@@ -18,7 +18,10 @@ exports.findAllTVShows = function(req, res) {
 exports.findById = function(req, res) {
   TVShow.findById(req.params.id, function(err, tvshow) {
     if(!err) {
-      res.send(tvshow);
+      res.send({
+        show: tvshow,
+        recommended: tvshow.recommended()
+      });
     } else {
       console.log('ERROR: ' + err);
     }

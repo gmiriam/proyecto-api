@@ -1,7 +1,7 @@
 var mongoose = require('mongoose'),
     Schema   = mongoose.Schema;
 
-var tvshowSchema = new Schema({
+var tvshowSchema = Schema({
   title:    { type: String },
   year:     { type: Number },
   country:  { type: String },
@@ -10,7 +10,9 @@ var tvshowSchema = new Schema({
   genre:    { type: String, enum:
   ['Drama', 'Fantasy', 'Sci-Fi', 'Thriller', 'Comedy']
         },
-  summary:  { type: String }    
+  summary:  { type: String }
 });
-
+ tvshowSchema.methods.recommended = function(){
+      return 'sí';
+    }
 module.exports = mongoose.model('TVShow', tvshowSchema);
