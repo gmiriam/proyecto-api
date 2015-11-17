@@ -1,29 +1,21 @@
 var mongoose = require('mongoose'),
     Schema   = mongoose.Schema;
 
-var taskSchema = Schema({
-  name: {
+var teacherSchema = Schema({
+  firstName: {
     type: String
   },
-  statement: {
+  surname: {
+    type: String
+  },
+  email: {
     type: String 
   },
-  startDate: {
-    type: Date
-  },
-  endDate: {
-    type: Date
-  },
-  maxScore: {
-    type: Number,
-    min: 0,
-    max: 100
-  },
-  //Parent
-  subject: {
+  password: {
     type: String
-  }
+  },
+  subjects: [String] // IDs de subjects
 });
 
-module.exports = mongoose.model('task', taskSchema);
+module.exports = mongoose.model('teacher', teacherSchema);
 

@@ -1,5 +1,4 @@
 var mongoose = require('mongoose'),
-  subjectSchema = mongoose.model('subject'),
   Schema = mongoose.Schema;
 
 var studentSchema = Schema({
@@ -15,10 +14,8 @@ var studentSchema = Schema({
   password: {
     type: String
   },
-  //Parent
-  subject: {
-    type: [subjectSchema]
-  }
+  subjects: [String], // IDs de subjects
+  tasks: [String] // IDs de tasks
 });
 
 module.exports = mongoose.model('student', studentSchema);

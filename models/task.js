@@ -20,9 +20,8 @@ var taskSchema = Schema({
     min: 0,
     max: 100
   },
-  //Parent
-  subject: {
-    type: subjectSchema
+  teacher: {
+    type: String // ID
   }
 });
 

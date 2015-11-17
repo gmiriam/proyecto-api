@@ -1,29 +1,22 @@
 var mongoose = require('mongoose'),
     Schema   = mongoose.Schema;
 
-var taskSchema = Schema({
-  name: {
-    type: String
+var deliverySchema = Schema({
+  task: {
+    type: String // ID
   },
-  statement: {
-    type: String 
+  student: {
+    type: String // ID
   },
-  startDate: {
-    type: Date
-  },
-  endDate: {
-    type: Date
-  },
-  maxScore: {
+  score: {
     type: Number,
     min: 0,
     max: 100
   },
-  //Parent
-  subject: {
-    type: String
+  data: {
+    type: String // URL
   }
 });
 
-module.exports = mongoose.model('task', taskSchema);
+module.exports = mongoose.model('delivery', deliverySchema);
 

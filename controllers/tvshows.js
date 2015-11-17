@@ -45,13 +45,13 @@ exports.addTVShow = function(req, res) {
 
   tvshow.save(function(err) {
     if(!err) {
+      res.send(tvshow);
       console.log('Created');
     } else {
       console.log('ERROR: ' + err);
     }
   });
 
-  res.send(tvshow);
 };
 
 exports.updateTVShow = function(req, res) {
