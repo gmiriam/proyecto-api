@@ -2,18 +2,9 @@ var mongoose = require('mongoose'),
   Schema = mongoose.Schema;
 
 var studentSchema = Schema({
-  firstName: {
+  user: {
     type: String
-  },
-  surname: {
-    type: String
-  },
-  email: {
-    type: String 
-  },
-  password: {
-    type: String
-  },
+  }, // ID del user
   subjects: [String], // IDs de subjects
   tasks: [String] // IDs de tasks
 });
