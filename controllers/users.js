@@ -1,10 +1,10 @@
 ﻿
 var mongoose = require('mongoose');
-var user = mongoose.model('user');
+var User = mongoose.model('user');
 
 //GET - Devuvelve todos los users en la DB
 exports.findAllUsers = function(req, res) {
-    user.find(function(err, users) {
+    User.find(function(err, users) {
         if(!err) {
             res.send(users);
         } else {
@@ -15,7 +15,7 @@ exports.findAllUsers = function(req, res) {
 
   //GET - Devuelve un user con un ID específico.
   exports.findUserById = function(req, res) {
-  user.findById(req.params.id, function(err, user) {
+  User.findById(req.params.id, function(err, user) {
     if(!err) {
       res.send({
         user: user, //Mirar. Antes: show: TVShow
@@ -31,7 +31,7 @@ exports.addUser = function(req, res) {
   console.log('POST');
   console.log(req.body);
 
-  var user = new user({
+  var user = new User({
     firstName:    req.body.firstName,
     surname:     req.body.surname,
     email:  req.body.email,
@@ -50,7 +50,7 @@ exports.addUser = function(req, res) {
 };
 
 exports.updateUser = function(req, res) {
-  user.findById(req.params.id, function(err, user) {
+  User.findById(req.params.id, function(err, user) {
     user.firstName = req.body.firstName;
     user.surname = req.body.surname;
     user.email = req.body.email;
@@ -69,7 +69,7 @@ exports.updateUser = function(req, res) {
 };
 
 exports.deleteUser = function(req, res) {
-  user.findById(req.params.id, function(err1, user) {
+  User.findById(req.params.id, function(err1, user) {
     if (user) {
       user.remove(function(err2) {
         if(!err2) {

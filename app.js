@@ -15,7 +15,7 @@ mongoose.connect('mongodb://localhost/users', function(err, res) {
         console.log('Conectado a la base de datos');
 });
 
-var model = require('./models/user')(app, mongoose);
+var model = require('./models/user')//app, mongoose);
 
 var userCtrl = require('./controllers/users');
 
