@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var User = mongoose.model('user');
 
 //GET - Devuvelve todos los users en la DB
-exports.findAllUsers = function(req, res) {
+exports.findAll = function(req, res) {
     User.find(function(err, users) {
         if(!err) {
             res.send(users);
@@ -14,7 +14,7 @@ exports.findAllUsers = function(req, res) {
 };
 
   //GET - Devuelve un user con un ID específico.
-  exports.findUserById = function(req, res) {
+  exports.findById = function(req, res) {
   User.findById(req.params.id, function(err, user) {
     if(!err) {
       res.send({
@@ -27,7 +27,7 @@ exports.findAllUsers = function(req, res) {
 };
 
 //Insertar un nuevo usuario en db
-exports.addUser = function(req, res) {
+exports.add = function(req, res) {
   console.log('POST');
   console.log(req.body);
 
@@ -49,7 +49,7 @@ exports.addUser = function(req, res) {
 
 };
 
-exports.updateUser = function(req, res) {
+exports.update = function(req, res) {
   User.findById(req.params.id, function(err, user) {
     user.firstName = req.body.firstName;
     user.surname = req.body.surname;
@@ -68,7 +68,7 @@ exports.updateUser = function(req, res) {
   });
 };
 
-exports.deleteUser = function(req, res) {
+exports.delete = function(req, res) {
   User.findById(req.params.id, function(err1, user) {
     if (user) {
       user.remove(function(err2) {

@@ -1,24 +1,24 @@
 ﻿
 var mongoose = require('mongoose');
-var Subject = mongoose.model('subject');
+var Course = mongoose.model('course');
 
-//GET - Devuvelve todos los subjects en la DB
+//GET - Devuvelve todos los cursos en la DB
 exports.findAll = function(req, res) {
-    Subject.find(function(err, subjects) {
+    Course.find(function(err, course) {
         if(!err) {
-            res.send(subjects);
+            res.send(course);
         } else {
             console.log('ERROR: ' + err);
         }
     });
 };
 
-  //GET - Devuelve un subject con un ID específico.
+  //GET - Devuelve un curso con un ID específico.
   exports.findById = function(req, res) {
-  Subject.findById(req.params.id, function(err, subject) {
+  Course.findById(req.params.id, function(err, course) {
     if(!err) {
       res.send({
-        subject: subject, 
+        course: course,
       });
     } else {
       console.log('ERROR: ' + err);
@@ -26,21 +26,19 @@ exports.findAll = function(req, res) {
   });
 };
 
-//Insertar un nuevo usuario en db
+//Insertar un nuevo curso en db
 exports.add = function(req, res) {
   console.log('POST');
   console.log(req.body);
 
-  var subject = new Subject({
+  var course = new Course({
     name:    req.body.name,
-    course:     req.body.course,
-    description:  req.body.description,
-    temary:   req.body.temary
+    subjects:     req.body.subjects
   });
 
-  subject.save(function(err) {
+  course.save(function(err) {
     if(!err) {
-      res.send(subject);
+      res.send(course);
       console.log('Created');
     } else {
       console.log('ERROR: ' + err);
@@ -50,28 +48,26 @@ exports.add = function(req, res) {
 };
 
 exports.update = function(req, res) {
-  Subject.findById(req.params.id, function(err, subject) {
-    subject.name = req.body.name;
-    subject.course = req.body.course;
-    subject.description = req.body.description;
-    subject.temary = req.body.temary;
+  Course.findById(req.params.id, function(err, course) {
+    course.name = req.body.name;
+    course.subjects = req.body.subjects; //HELP!! Aunque sea [] es igual??
 
-    subject.save(function(err) {
+    course.save(function(err) {
       if(!err) {
       console.log('Updated');
       } else {
       console.log('ERROR: ' + err);
       }
 
-      res.send(subject);
+      res.send(course);
     });
   });
 };
 
 exports.delete = function(req, res) {
-  Subject.findById(req.params.id, function(err1, subject) {
-    if (subject) {
-      subject.remove(function(err2) {
+  Course.findById(req.params.id, function(err1, course) {
+    if (course) {
+      course.remove(function(err2) {
         if(!err2) {
         console.log('Removed');
         res.send("Eliminado");

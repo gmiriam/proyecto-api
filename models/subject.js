@@ -21,6 +21,6 @@ module.exports = mongoose.model('subject', subjectSchema);
 
 // Prueba
 function courseValidator(course) {
-  return course.length === 9;
+  return course.length > 1;
 }
 

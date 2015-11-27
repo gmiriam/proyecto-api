@@ -15,24 +15,36 @@ mongoose.connect('mongodb://localhost/users', function(err, res) {
         console.log('Conectado a la base de datos');
 });
 
-var model = require('./models/user')//app, mongoose);
-
+var userModel = require('./models/user');//app, mongoose);
 var userCtrl = require('./controllers/users');
+
+var subjectModel = require('./models/subject');
+var subjectCtrl = require('./controllers/subjects');
 
 // API routes
 var users = express.Router();
+var subjects = express.Router();
 
 users.route('/users')
-  .get(userCtrl.findAllUsers)
-  .post(userCtrl.addUser);
+  .get(userCtrl.findAll)
+  .post(userCtrl.add);
 
 users.route('/users/:id')
-  .get(userCtrl.findUserById)
-  .put(userCtrl.updateUser)
-  .delete(userCtrl.deleteUser);
+  .get(userCtrl.findById)
+  .put(userCtrl.update)
+  .delete(userCtrl.delete);
+  
+subjects.route('/subjects')
+	.get(subjectCtrl.findAll)
+	.post(subjectCtrl.add);
 
+subjects.route('/subjects/:id')
+	.get(subjectCtrl.findAll)
+	.post(subjectCtrl.update)
+	.delete(subjectCtrl.delete);
+	
 app.use('/api', users);
-
+app.use('/api', subjects);
 
 
 
