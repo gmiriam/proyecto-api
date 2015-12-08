@@ -45,7 +45,8 @@ exports.add = function(req, res) {
       res.send(task);
       console.log('Created');
     } else {
-      console.log('ERROR: ' + err);
+      res.status(400).send(err);
+      console.log(err);
     }
   });
 

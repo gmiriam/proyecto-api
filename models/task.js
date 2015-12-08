@@ -14,7 +14,7 @@ var taskSchema = Schema({
   },
   endDate: {
     type: Date,
-	validate: [endDateValidator, 'Error: La fecha de cierre es anterior a la de inicio.']
+	validate: [endDateValidator, 'La fecha de cierre es anterior a la de inicio.']
   },
   maxScore: {
     type: Number,
@@ -29,6 +29,6 @@ var taskSchema = Schema({
 module.exports = mongoose.model('task', taskSchema);
 
 // Prueba
-function endDateValidator(startDate, endDate) {
-  return endDate > startDate;
+function endDateValidator(endDate) {
+  return endDate > this.startDate;
 }
