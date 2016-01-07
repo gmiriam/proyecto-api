@@ -51,16 +51,16 @@ courses.route('/courses')
 
 courses.route('/courses/:id')
 	.get(courseCtrl.findById)
-	.post(courseCtrl.update)
+	.put(courseCtrl.update)
 	.delete(courseCtrl.delete);
 	
 deliveries.route('/deliveries')
 	.get(deliveryCtrl.findAll)
 	.post(deliveryCtrl.add);
 
-deliveries.route('/deiveries/:id')
+deliveries.route('/deliveries/:id')
 	.get(deliveryCtrl.findById)
-	.post(deliveryCtrl.update)
+	.put(deliveryCtrl.update)
 	.delete(deliveryCtrl.delete);
 	
 scores.route('/scores')
@@ -69,7 +69,7 @@ scores.route('/scores')
 
 scores.route('/scores/:id')
 	.get(scoreCtrl.findById)
-	.post(scoreCtrl.update)
+	.put(scoreCtrl.update)
 	.delete(scoreCtrl.delete);
 	
 subjects.route('/subjects')
@@ -78,7 +78,7 @@ subjects.route('/subjects')
 
 subjects.route('/subjects/:id')
 	.get(subjectCtrl.findById)
-	.post(subjectCtrl.update)
+	.put(subjectCtrl.update)
 	.delete(subjectCtrl.delete);
 	
 tasks.route('/tasks')
@@ -87,7 +87,7 @@ tasks.route('/tasks')
 
 tasks.route('/tasks/:id')
 	.get(taskCtrl.findById)
-	.post(taskCtrl.update)
+	.put(taskCtrl.update)
 	.delete(taskCtrl.delete);
 	
 users.route('/users')
