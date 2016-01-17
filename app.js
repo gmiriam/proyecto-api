@@ -24,14 +24,20 @@ var deliveryCtrl = require('./controllers/deliveries');
 var scoreModel = require('./models/score');
 var scoreCtrl = require('./controllers/scores');
 
+var studentModel = require('./models/student');
+var studentCtrl = require('./controllers/students');
+
 var subjectModel = require('./models/subject');
 var subjectCtrl = require('./controllers/subjects');
 
 var taskModel = require('./models/task');
 var taskCtrl = require('./controllers/tasks');
 
-var userModel = require('./models/user');
-var userCtrl = require('./controllers/users');
+var teacherModel = require('./models/teacher');
+var teacherCtrl = require('./controllers/teachers');
+
+/*var userModel = require('./models/user');
+var userCtrl = require('./controllers/users');*/
 
 
 
@@ -41,8 +47,10 @@ var userCtrl = require('./controllers/users');
 var courses = express.Router();
 var deliveries = express.Router();
 var scores = express.Router();
+var students = express.Router();
 var subjects = express.Router();
 var tasks = express.Router();
+var teachers = express.Router();
 var users = express.Router();
 
 courses.route('/courses')
@@ -72,39 +80,50 @@ scores.route('/scores/:id')
 	.put(scoreCtrl.update)
 	.delete(scoreCtrl.delete);
 	
+students.route('/students')
+  .get(studentCtrl.findAll)
+  .post(studentCtrl.add);
+
+students.route('/students/:id')
+  .get(studentCtrl.findById)
+  .put(studentCtrl.update)
+  .delete(studentCtrl.delete);
+  
 subjects.route('/subjects')
-	.get(subjectCtrl.findAll)
-	.post(subjectCtrl.add);
+  .get(subjectCtrl.findAll)
+  .post(subjectCtrl.add);
 
 subjects.route('/subjects/:id')
-	.get(subjectCtrl.findById)
-	.put(subjectCtrl.update)
-	.delete(subjectCtrl.delete);
-	
+  .get(subjectCtrl.findById)
+  .put(subjectCtrl.update)
+  .delete(subjectCtrl.delete);
+  
 tasks.route('/tasks')
-	.get(taskCtrl.findAll)
-	.post(taskCtrl.add);
+  .get(taskCtrl.findAll)
+  .post(taskCtrl.add);
 
 tasks.route('/tasks/:id')
-	.get(taskCtrl.findById)
-	.put(taskCtrl.update)
-	.delete(taskCtrl.delete);
-	
-users.route('/users')
-  .get(userCtrl.findAll)
-  .post(userCtrl.add);
+  .get(taskCtrl.findById)
+  .put(taskCtrl.update)
+  .delete(taskCtrl.delete);
+  
+teachers.route('/teachers')
+  .get(teacherCtrl.findAll)
+  .post(teacherCtrl.add);
 
-users.route('/users/:id')
-  .get(userCtrl.findById)
-  .put(userCtrl.update)
-  .delete(userCtrl.delete);
+teachers.route('/teachers/:id')
+  .get(teacherCtrl.findById)
+  .put(teacherCtrl.update)
+  .delete(teacherCtrl.delete);
+
 	
 app.use('/api', courses);
 app.use('/api', deliveries);
 app.use('/api', scores);
+app.use('/api', students);
 app.use('/api', subjects);
 app.use('/api', tasks);
-app.use('/api', users);
+app.use('/api', teachers);
 
 
 
