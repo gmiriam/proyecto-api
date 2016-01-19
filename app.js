@@ -15,6 +15,9 @@ mongoose.connect('mongodb://localhost/users', function(err, res) {
         console.log('Conectado a la base de datos');
 });
 
+var adminModel = require('./models/admin');
+var adminCtrl = require('./controllers/admins');
+
 var courseModel = require('./models/course');
 var courseCtrl = require('./controllers/courses');
 
@@ -43,7 +46,7 @@ var userCtrl = require('./controllers/users');*/
 
 
 // API routes
-
+var admins = express.Router();
 var courses = express.Router();
 var deliveries = express.Router();
 var scores = express.Router();
@@ -52,6 +55,16 @@ var subjects = express.Router();
 var tasks = express.Router();
 var teachers = express.Router();
 var users = express.Router();
+
+admins.route('/admins')
+	.get(adminCtrl.findAll)
+	.post(adminCtrl.add);
+
+admins.route('/admins/:id')
+	.get(adminCtrl.findById)
+	.put(adminCtrl.update)
+	.delete(adminCtrl.delete);
+	
 
 courses.route('/courses')
 	.get(courseCtrl.findAll)

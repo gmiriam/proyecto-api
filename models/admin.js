@@ -1,8 +1,7 @@
 ﻿var mongoose = require('mongoose'),
-  Schema = mongoose.Schema;
-var userSchema = Schema({
-  user: {
-    type: String
-  } // ID del user
-});
+	userData = JSON.parse(JSON.stringify(require('./userData'))),
+  	Schema = mongoose.Schema;
+
+var adminSchema = Schema(userData);
+
 module.exports = mongoose.model('admin', adminSchema);
