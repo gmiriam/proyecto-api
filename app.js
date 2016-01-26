@@ -1,4 +1,6 @@
-var express = require("express"),
+var express = require('express'),
+    session = require('express-session'),
+    CASAuthentication = require('cas-authentication'),
     app = express(),
     bodyParser  = require("body-parser"),
     methodOverride = require("method-override");
@@ -7,6 +9,16 @@ var express = require("express"),
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride());
+app.use( session({
+    secret            : 'this app key',
+    resave            : false,
+    saveUninitialized : true
+}));
+
+var cas = new CASAuthentication({
+    cas_url     : 'http://jasigcas.herokuapp.com/login', //Cambiar
+    service_url : 'http://localhost:3000'
+});
 
 mongoose.connect('mongodb://localhost/users', function(err, res) {
     if (err)
@@ -67,7 +79,7 @@ admins.route('/admins/:id')
 	
 
 courses.route('/courses')
-	.get(courseCtrl.findAll)
+	.get(cas.bounce, courseCtrl.findAll)
 	.post(courseCtrl.add);
 
 courses.route('/courses/:id')
