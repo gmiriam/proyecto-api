@@ -16,7 +16,7 @@ app.use( session({
 }));
 
 var cas = new CASAuthentication({
-    cas_url     : 'http://jasigcas.herokuapp.com/login', //Cambiar
+    cas_url     : 'http://pedroetb.no-ip.org:2200/cas', 
     service_url : 'http://localhost:3000'
 });
 
@@ -142,6 +142,7 @@ teachers.route('/teachers/:id')
   .delete(teacherCtrl.delete);
 
 	
+app.use('/api', admins);
 app.use('/api', courses);
 app.use('/api', deliveries);
 app.use('/api', scores);
