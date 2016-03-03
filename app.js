@@ -1,4 +1,5 @@
 var express = require('express'),
+    seneca = require('seneca')(),
     session = require('express-session'),
     CASAuthentication = require('cas-authentication'),
     app = express(),
@@ -27,7 +28,48 @@ mongoose.connect('mongodb://localhost/users', function(err, res) {
         console.log('Conectado a la base de datos');
 });
 
+
+
+//*******************************************************
+
 var adminModel = require('./models/admin');
+
+var mongoose = require('mongoose');
+var Admin = mongoose.model('admin');
+
+seneca.add('role:api,category:admin,cmd:findAll', function(args,done){
+    Admin.find(function(err, admins) {
+        if(!err) {
+            done(null,admins);
+        } else {
+            console.log('ERROR: ' + err);
+            done(err,'ERROR: ' + err);
+        }
+    });
+})
+
+seneca.act('role:web',{use:{
+
+  // define some routes that start with /api
+  prefix: '/api',
+
+  // use action patterns where role has the value 'api' and cmd has some defined value
+  pin: {role:'api',category: 'admin', cmd:'*'},
+
+  // for each value of cmd, match some HTTP method, and use the
+  // query parameters as values for the action
+  map:{
+    findAll: {GET:true}          // explicitly accepting GETs
+  }
+}})
+
+
+app.use( seneca.export('web'))
+//*************************************************************
+
+
+
+//var adminModel = require('./models/admin');
 var adminCtrl = require('./controllers/admins');
 
 var courseModel = require('./models/course');
