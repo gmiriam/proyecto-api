@@ -17,8 +17,8 @@ app.use( session({
 }));
 
 var cas = new CASAuthentication({
-    cas_url     : 'http://pedroetb.no-ip.org:2200/cas', 
-    service_url : 'http://localhost:3000'
+    cas_url     : 'http://localhost:8080/cas', 
+    service_url : 'http://localhost:3000/api'
 });
 
 mongoose.connect('mongodb://localhost/users', function(err, res) {
@@ -48,18 +48,54 @@ seneca.add('role:api,category:admin,cmd:findAll', function(args,done){
     });
 })
 
+seneca.add('role:api,category:admin,cmd:findById', function(args,done){
+  Admin.findById(args._id, function(err, admin) {
+      if(!err) {
+        done(null, [admin]);
+      } else {
+        console.log('ERROR: ' + err);
+        done(null,{});
+      }
+    });
+})
+
+seneca.add('role:api,category:admin,cmd:add', function(args,done){
+  console.log('POST');
+
+  var obj = {
+    firstName:    args.firstName,
+    surname:     args.surname,
+    email:  args.email,
+    password:   args.password
+  };
+  var admin = new Admin(obj);
+  console.log(admin);
+
+  admin.save(function(err) {
+    if(!err) {
+      done(null,[admin]);
+      console.log('Created');
+    } else {
+      console.log('ERROR: ' + err);
+      done(err,'ERROR: ' + err);
+    }
+  });
+})
+
 seneca.act('role:web',{use:{
 
   // define some routes that start with /api
-  prefix: '/api',
+  prefix: '/admin',
 
   // use action patterns where role has the value 'api' and cmd has some defined value
-  pin: {role:'api',category: 'admin', cmd:'*'},
+  pin: {role:'api', category: 'admin', cmd:'*'},
 
   // for each value of cmd, match some HTTP method, and use the
   // query parameters as values for the action
   map:{
-    findAll: {GET:true}          // explicitly accepting GETs
+    findAll: {GET:true},          // explicitly accepting GETs
+    findById: {GET: true, suffix: '/:_id'},
+    add: {POST: true}
   }
 }})
 

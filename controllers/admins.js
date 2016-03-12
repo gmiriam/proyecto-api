@@ -15,6 +15,7 @@ exports.findAll = function(req, res) {
 
   //GET - Devuelve un admin con un ID específico.
   exports.findById = function(req, res) {
+    console.log("entra", req.params.id)
   Admin.findById(req.params.id, function(err, admin) {
     if(!err) {
       res.send({
