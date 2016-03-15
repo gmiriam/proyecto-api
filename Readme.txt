@@ -1,24 +1,31 @@
-1º.- Mongodb
-/c/Archivos\ de\ programa/MongoDB/Server/3.0/bin/mongod --config /c/apirest/mongo.config
+1Âº.- Ejecutar Mongodb.
 
-2º.- en otra ventana
-cd /c/apirest/api 
-node app
+2Âº.- Ejecutar la aplicaciÃ³n con node app
 
 Direcciones:
+Administradores: 
+localhost:3000/admin/findAll
+localhost:3000/admin/findById/:id
+localhost:3000/admin/add
+
 localhost:3000/api/courses
 localhost:3000/api/deliveries
 localhost:3000/api/scores
+localhost:3000/api/students
 localhost:3000/api/subjects
 localhost:3000/api/tasks
+localhost:3000/api/teachers
 localhost:3000/api/users
 
+Para consultar un restClient como el rest easy en firefox.
 
-
-Para consultar datos: rest easy en firefox.
-Para poner datos poner en vez de get, put. 
-En data poner custom y MIME type es application/json.
-Poner en data el json de los datos a meter en la dirección de la tabla.
+Admin Example:
+{
+	"firstName": "Pedro",
+	"surname": "PÃ©rez",
+	"email": "pedro@hotmail.com",
+	"password": "contraseÃ±a123"
+}
 
 Course Example: 
 {
@@ -45,7 +52,7 @@ Subject Example:
   "name": "Mates",
   "course": "56617975ae5bc6580fac7efb",
   "description": "Estudiaremos las base de toda ciencia",
-  "temary"  : "Tema 1: sumas de números naturales. Tema 2: restas de números naturales."
+  "temary"  : "Tema 1: sumas de nÃºmeros naturales. Tema 2: restas de nÃºmeros naturales."
 }
 
 Task Example:
