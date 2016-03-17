@@ -32,41 +32,16 @@ mongoose.connect('mongodb://localhost/users', function(err, res) {
 
 //*******************************************************
 
-var adminModel = require('./models/admin');
 
-var mongoose = require('mongoose');
-var Admin = mongoose.model('admin');
-
-require('seneca')()
-  .use(minimal_plugin, {foo: 'bar'})
-
-
-seneca.act('role:web',{use:{
-
-  // define some routes that start with /api
-  prefix: '/admin',
-
-  // use action patterns where role has the value 'api' and cmd has some defined value
-  pin: {role:'api', category: 'admin', cmd:'*'},
-
-  // for each value of cmd, match some HTTP method, and use the
-  // query parameters as values for the action
-  map:{
-    findAll: {GET:true},          // explicitly accepting GETs
-    findById: {GET: true, suffix: '/:_id'},
-    add: {POST: true},
-	update: {PUT: true, suffix: '/:_id'},
-	delete: {DELETE: true, suffix: '/:_id'}
-  }
-}})
-
-
+seneca.use("plugins/admin", {})
 app.use( seneca.export('web'))
+
+
 //*************************************************************
 
 
 
-//var adminModel = require('./models/admin');
+var adminModel = require('./models/admin');
 var adminCtrl = require('./controllers/admins');
 
 var courseModel = require('./models/course');
