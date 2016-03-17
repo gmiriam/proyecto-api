@@ -4,9 +4,11 @@
 
 Direcciones:
 Administradores: 
-localhost:3000/admin/findAll
-localhost:3000/admin/findById/:id
-localhost:3000/admin/add
+http://localhost:3000/admin/findAll
+http://localhost:3000/admin/findById/:id
+http://localhost:3000/admin/add
+http://localhost:3000/admin/update/:id
+
 
 localhost:3000/api/courses
 localhost:3000/api/deliveries
