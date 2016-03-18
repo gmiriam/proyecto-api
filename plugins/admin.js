@@ -9,8 +9,8 @@ this.add('role:api,category:admin,cmd:findAll', function(args,done){
         if(!err) {
             done(null,admins);
         } else {
-            console.log('ERROR: ' + err);
-            done(err,'ERROR: ' + err);
+            done(err,
+			getResponse("error", err, null));
         }
     });
 })
@@ -20,8 +20,8 @@ this.add('role:api,category:admin,cmd:findById', function(args,done){
       if(!err) {
         done(null, [admin]);
       } else {
-        console.log('ERROR: ' + err);
-        done(null,{});
+        done(err,
+		getResponse("error",err,null));
       }
     });
 })
@@ -43,8 +43,8 @@ this.add('role:api,category:admin,cmd:add', function(args,done){
       done(null,[admin]);
       console.log('Created');
     } else {
-      console.log('ERROR: ' + err);
-      done(err,'ERROR: ' + err);
+      done(err,
+		getResponse("error",err,null));
     }
   });
 })
@@ -59,10 +59,9 @@ this.add('role:api,category:admin,cmd:update', function(args,done){
     admin.save(function(err) {
       if(!err) {
 		done(null,[admin]);
-		console.log('Updated');
       } else {
-		console.log('ERROR: ' + err);
-	    done(err,'ERROR: ' + err);
+	    done(err,
+		getResponse('error',err,null));
       }
     });
   });
@@ -75,16 +74,16 @@ this.add('role:api,category:admin,cmd:delete', function(args,done){
       admin.remove(function(err) {
         if(!err) {
           var status = {"status" : "success"};
-        console.log('Removed');
-        done(null,status);
+        done(null, getResponse("success", null,null));
         } else {
         console.log('ERROR: ' + err);
-		    done(err, generateResponse("error", err,null));
+		    done(err, getResponse("error", err,null));
         }
       })
     }
     else {
-      done(err, generateResponse("error", err, "No se ha encontrado el elemento que buscaba"));
+      done(err, 
+	  getResponse("error", err, "No se ha encontrado el elemento que buscaba"));
     }
   });
 })
@@ -113,7 +112,7 @@ function init(msg, respond) {
   respond();
 }
 
-function generateResponse (status, content, message) {
+function getResponse (status, content, message) {
   return {
     "status" : status,
     "content": content,
