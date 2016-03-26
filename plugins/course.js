@@ -34,7 +34,7 @@ this.add('role:api,category:course,cmd:add', function(args,done){
   console.log('POST');
 
   var obj = {
-    name:    args.name,
+    name:    args['req$'].body.name,
     subjects:     args.subjects
   };
   var course = new Course(obj);
