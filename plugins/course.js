@@ -1,14 +1,14 @@
-﻿var mongoose = require('mongoose');
-var adminModel = require('../models/admin');
-var Admin = mongoose.model('admin');
+var mongoose = require('mongoose');
+var courseModel = require('../models/course');
+var Course = mongoose.model('course');
 
-module.exports = function admin () {
+module.exports = function course () {
   
-this.add('role:api,category:admin,cmd:findAll', function(args,done){
-    Admin.find(function(err, admins) {
+this.add('role:api,category:course,cmd:findAll', function(args,done){
+    Course.find(function(err, courses) {
         if(!err) {
             done(null,
-              generateResponse("success",admins,null));
+              generateResponse("success",courses,null));
         } else {
             console.log('ERROR: ' + err);
             done(err,
@@ -17,11 +17,11 @@ this.add('role:api,category:admin,cmd:findAll', function(args,done){
     });
 })
 
-this.add('role:api,category:admin,cmd:findById', function(args,done){
-  Admin.findById(args._id, function(err, admin) {
+this.add('role:api,category:course,cmd:findById', function(args,done){
+  Course.findById(args._id, function(err, course) {
       if(!err) {
         done(null,
-          generateResponse("success",admin,null));
+          generateResponse("success",[course],null));
       } else {
         console.log('ERROR: ' + err);
         done(err,
@@ -30,22 +30,20 @@ this.add('role:api,category:admin,cmd:findById', function(args,done){
     });
 })
 
-this.add('role:api,category:admin,cmd:add', function(args,done){
+this.add('role:api,category:course,cmd:add', function(args,done){
   console.log('POST');
 
   var obj = {
-    firstName:    args.firstName,
-    surname:     args.surname,
-    email:  args.email,
-    password:   args.password
+    name:    args.name,
+    subjects:     args.subjects
   };
-  var admin = new Admin(obj);
-  console.log(admin);
+  var course = new Course(obj);
+  console.log(course);
 
-  admin.save(function(err) {
+  course.save(function(err) {
     if(!err) {
       done(null,
-        generateResponse("success",admin,null));
+        generateResponse("success",[course],null));
       console.log('Created');
     } else {
       console.log('ERROR: ' + err);
@@ -55,39 +53,37 @@ this.add('role:api,category:admin,cmd:add', function(args,done){
   });
 })
 
-this.add('role:api,category:admin,cmd:update', function(args,done){
-  Admin.findById(args._id, function(err, admin) {
-    admin.firstName = args.firstName;
-    admin.surname = args.surname;
-    admin.email = args.email;
-    admin.password = args.password;
+this.add('role:api,category:course,cmd:update', function(args,done){
+  Course.findById(args._id, function(err, course) {
+    course.name = args.name;
+    course.subjects = args.subjects;
 
-    admin.save(function(err) {
+    course.save(function(err) {
       if(!err) {
-		done(null,
-      generateResponse("success",admin,null));
-		console.log('Updated');
+    done(null,
+      generateResponse("success",[course],null));
+    console.log('Updated');
       } else {
-		console.log('ERROR: ' + err);
-	    done(err,
+    console.log('ERROR: ' + err);
+      done(err,
         generateResponse("error", err,null));
       }
     });
   });
 })
 
-this.add('role:api,category:admin,cmd:delete', function(args,done){
+this.add('role:api,category:course,cmd:delete', function(args,done){
    console.log(args._id); 
-  Admin.findById(args._id, function(err, admin) {
-    if (admin) {
-      admin.remove(function(err) {
+  Course.findById(args._id, function(err, course) {
+    if (course) {
+      course.remove(function(err) {
         if(!err) {
         console.log('Removed');
         done(null,
           generateResponse("success",null,null));
         } else {
         console.log('ERROR: ' + err);
-		    done(err, 
+        done(err, 
           generateResponse("error", err,null));
         }
       })
@@ -99,15 +95,15 @@ this.add('role:api,category:admin,cmd:delete', function(args,done){
   });
 })
 
-this.add('init:admin', init)
+this.add('init:course', init)
 
 function init(msg, respond) {
   this.act('role:web',{use:{
     // define some routes that start with /api
-    prefix: '/admin',
+    prefix: '/course',
 
     // use action patterns where role has the value 'api' and cmd has some defined value
-    pin: {role:'api', category: 'admin', cmd:'*'},
+    pin: {role:'api', category: 'course', cmd:'*'},
 
     // for each value of cmd, match some HTTP method, and use the
     // query parameters as values for the action
@@ -132,5 +128,5 @@ function generateResponse (status, content, message) {
 }
 
   
-  return 'admin'
+  return 'course'
 }

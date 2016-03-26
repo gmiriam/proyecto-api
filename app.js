@@ -33,7 +33,7 @@ mongoose.connect('mongodb://localhost/users', function(err, res) {
 //*******************************************************
 
 
-seneca.use("plugins/admin", {})
+seneca.use("plugins/admin", "plugins/course", {})
 app.use( seneca.export('web'))
 
 
