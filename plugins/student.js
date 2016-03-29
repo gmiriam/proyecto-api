@@ -1,11 +1,11 @@
-var mongoose = require('mongoose');
-var courseModel = require('../models/course');
-var Course = mongoose.model('course');
+﻿var mongoose = require('mongoose');
+var courseModel = require('../models/student');
+var Student = mongoose.model('student');
 
-module.exports = function course () {
+module.exports = function student () {
   
-this.add('role:api,category:course,cmd:findAll', function(args,done){
-    Course.find(function(err, courses) {
+this.add('role:api,category:student,cmd:findAll', function(args,done){
+    Student.find(function(err, courses) {
         if(!err) {
             done(null,
               generateResponse("success",courses,null));
@@ -17,11 +17,11 @@ this.add('role:api,category:course,cmd:findAll', function(args,done){
     });
 })
 
-this.add('role:api,category:course,cmd:findById', function(args,done){
-  Course.findById(args._id, function(err, course) {
+this.add('role:api,category:student,cmd:findById', function(args,done){
+  Student.findById(args._id, function(err, student) {
       if(!err) {
         done(null,
-          generateResponse("success",[course],null));
+          generateResponse("success",[student],null));
       } else {
         console.log('ERROR: ' + err);
         done(err,
@@ -30,20 +30,24 @@ this.add('role:api,category:course,cmd:findById', function(args,done){
     });
 })
 
-this.add('role:api,category:course,cmd:add', function(args,done){
+this.add('role:api,category:student,cmd:add', function(args,done){
   console.log('POST');
 
   var obj = {
-    name:    args['req$'].body.name,
-    subjects:     args.subjects
+    firstName:    args.firstName,
+    surname:     args.surname,
+    email:  args.email,
+    password:   args.password,
+	subjects: args.subjects,
+	tasks: args.tasks
   };
-  var course = new Course(obj);
-  console.log(course);
+  var student = new Student(obj);
+  console.log(student);
 
-  course.save(function(err) {
+  student.save(function(err) {
     if(!err) {
       done(null,
-        generateResponse("success",[course],null));
+        generateResponse("success",[student],null));
       console.log('Created');
     } else {
       console.log('ERROR: ' + err);
@@ -53,15 +57,19 @@ this.add('role:api,category:course,cmd:add', function(args,done){
   });
 })
 
-this.add('role:api,category:course,cmd:update', function(args,done){
-  Course.findById(args._id, function(err, course) {
-    course.name = args['req$'].body.name;
-    course.subjects = args.subjects;
+this.add('role:api,category:student,cmd:update', function(args,done){
+  Student.findById(args._id, function(err, student) {
+    student.firstName = args.firstName;
+    student.surname = args.surname;
+    student.email = args.email;
+    student.password = args.password;
+	student.subjects = args.subjects;
+	student.tasks = args.tasks;
 
-    course.save(function(err) {
+    student.save(function(err) {
       if(!err) {
     done(null,
-      generateResponse("success",[course],null));
+      generateResponse("success",[student],null));
     console.log('Updated');
       } else {
     console.log('ERROR: ' + err);
@@ -72,11 +80,11 @@ this.add('role:api,category:course,cmd:update', function(args,done){
   });
 })
 
-this.add('role:api,category:course,cmd:delete', function(args,done){
+this.add('role:api,category:student,cmd:delete', function(args,done){
    console.log(args._id); 
-  Course.findById(args._id, function(err, course) {
-    if (course) {
-      course.remove(function(err) {
+  Student.findById(args._id, function(err, student) {
+    if (student) {
+      student.remove(function(err) {
         if(!err) {
         console.log('Removed');
         done(null,
@@ -95,15 +103,15 @@ this.add('role:api,category:course,cmd:delete', function(args,done){
   });
 })
 
-this.add('init:course', init)
+this.add('init:student', init)
 
 function init(msg, respond) {
   this.act('role:web',{use:{
     // define some routes that start with /api
-    prefix: '/course',
+    prefix: '/student',
 
     // use action patterns where role has the value 'api' and cmd has some defined value
-    pin: {role:'api', category: 'course', cmd:'*'},
+    pin: {role:'api', category: 'student', cmd:'*'},
 
     // for each value of cmd, match some HTTP method, and use the
     // query parameters as values for the action
@@ -128,5 +136,5 @@ function generateResponse (status, content, message) {
 }
 
   
-  return 'course'
+  return 'student'
 }

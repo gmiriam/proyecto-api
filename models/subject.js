@@ -5,10 +5,10 @@ var subjectSchema = Schema({
   name: {
     type: String
   },
-  course: {
+  /*course: {
     type: String,
     validate: [courseValidator, 'Error: Curso no permitido.']
-  },
+  },*/
   description: {
     type: String 
   },

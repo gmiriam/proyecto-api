@@ -1,11 +1,11 @@
-var mongoose = require('mongoose');
-var courseModel = require('../models/course');
-var Course = mongoose.model('course');
+﻿var mongoose = require('mongoose');
+var courseModel = require('../models/task');
+var Task = mongoose.model('task');
 
-module.exports = function course () {
+module.exports = function task () {
   
-this.add('role:api,category:course,cmd:findAll', function(args,done){
-    Course.find(function(err, courses) {
+this.add('role:api,category:task,cmd:findAll', function(args,done){
+    Task.find(function(err, courses) {
         if(!err) {
             done(null,
               generateResponse("success",courses,null));
@@ -17,11 +17,11 @@ this.add('role:api,category:course,cmd:findAll', function(args,done){
     });
 })
 
-this.add('role:api,category:course,cmd:findById', function(args,done){
-  Course.findById(args._id, function(err, course) {
+this.add('role:api,category:task,cmd:findById', function(args,done){
+  Task.findById(args._id, function(err, task) {
       if(!err) {
         done(null,
-          generateResponse("success",[course],null));
+          generateResponse("success",[task],null));
       } else {
         console.log('ERROR: ' + err);
         done(err,
@@ -30,20 +30,24 @@ this.add('role:api,category:course,cmd:findById', function(args,done){
     });
 })
 
-this.add('role:api,category:course,cmd:add', function(args,done){
+this.add('role:api,category:task,cmd:add', function(args,done){
   console.log('POST');
 
   var obj = {
     name:    args['req$'].body.name,
-    subjects:     args.subjects
+    statement:     args.statement,
+	startDate:	args.startDate,
+	endDate: args.endDate,
+	maxScore: args.maxScore,
+	teacher: args.teacher
   };
-  var course = new Course(obj);
-  console.log(course);
+  var task = new Task(obj);
+  console.log(task);
 
-  course.save(function(err) {
+  task.save(function(err) {
     if(!err) {
       done(null,
-        generateResponse("success",[course],null));
+        generateResponse("success",[task],null));
       console.log('Created');
     } else {
       console.log('ERROR: ' + err);
@@ -53,15 +57,19 @@ this.add('role:api,category:course,cmd:add', function(args,done){
   });
 })
 
-this.add('role:api,category:course,cmd:update', function(args,done){
-  Course.findById(args._id, function(err, course) {
-    course.name = args['req$'].body.name;
-    course.subjects = args.subjects;
+this.add('role:api,category:task,cmd:update', function(args,done){
+  Task.findById(args._id, function(err, task) {
+    task.name = args['req$'].body.name;
+    task.statement = args.statement;
+	task.startDate = args.startDate;
+	task.endDate = args.endDate;
+	task.maxScore = args.maxScore;
+	task.teacher = args.teacher;
 
-    course.save(function(err) {
+    task.save(function(err) {
       if(!err) {
     done(null,
-      generateResponse("success",[course],null));
+      generateResponse("success",[task],null));
     console.log('Updated');
       } else {
     console.log('ERROR: ' + err);
@@ -72,11 +80,11 @@ this.add('role:api,category:course,cmd:update', function(args,done){
   });
 })
 
-this.add('role:api,category:course,cmd:delete', function(args,done){
+this.add('role:api,category:task,cmd:delete', function(args,done){
    console.log(args._id); 
-  Course.findById(args._id, function(err, course) {
-    if (course) {
-      course.remove(function(err) {
+  Task.findById(args._id, function(err, task) {
+    if (task) {
+      task.remove(function(err) {
         if(!err) {
         console.log('Removed');
         done(null,
@@ -95,15 +103,15 @@ this.add('role:api,category:course,cmd:delete', function(args,done){
   });
 })
 
-this.add('init:course', init)
+this.add('init:task', init)
 
 function init(msg, respond) {
   this.act('role:web',{use:{
     // define some routes that start with /api
-    prefix: '/course',
+    prefix: '/task',
 
     // use action patterns where role has the value 'api' and cmd has some defined value
-    pin: {role:'api', category: 'course', cmd:'*'},
+    pin: {role:'api', category: 'task', cmd:'*'},
 
     // for each value of cmd, match some HTTP method, and use the
     // query parameters as values for the action
@@ -128,5 +136,5 @@ function generateResponse (status, content, message) {
 }
 
   
-  return 'course'
+  return 'task'
 }

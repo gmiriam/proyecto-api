@@ -1,11 +1,11 @@
-var mongoose = require('mongoose');
-var courseModel = require('../models/course');
-var Course = mongoose.model('course');
+﻿var mongoose = require('mongoose');
+var courseModel = require('../models/user');
+var User = mongoose.model('user');
 
-module.exports = function course () {
+module.exports = function user () {
   
-this.add('role:api,category:course,cmd:findAll', function(args,done){
-    Course.find(function(err, courses) {
+this.add('role:api,category:user,cmd:findAll', function(args,done){
+    User.find(function(err, courses) {
         if(!err) {
             done(null,
               generateResponse("success",courses,null));
@@ -17,11 +17,11 @@ this.add('role:api,category:course,cmd:findAll', function(args,done){
     });
 })
 
-this.add('role:api,category:course,cmd:findById', function(args,done){
-  Course.findById(args._id, function(err, course) {
+this.add('role:api,category:user,cmd:findById', function(args,done){
+  User.findById(args._id, function(err, user) {
       if(!err) {
         done(null,
-          generateResponse("success",[course],null));
+          generateResponse("success",[user],null));
       } else {
         console.log('ERROR: ' + err);
         done(err,
@@ -30,20 +30,22 @@ this.add('role:api,category:course,cmd:findById', function(args,done){
     });
 })
 
-this.add('role:api,category:course,cmd:add', function(args,done){
+this.add('role:api,category:user,cmd:add', function(args,done){
   console.log('POST');
 
   var obj = {
-    name:    args['req$'].body.name,
-    subjects:     args.subjects
+    task:    args.task,
+    student:     args.student,
+	score:	args.score,
+	data: args.data
   };
-  var course = new Course(obj);
-  console.log(course);
+  var user = new User(obj);
+  console.log(user);
 
-  course.save(function(err) {
+  user.save(function(err) {
     if(!err) {
       done(null,
-        generateResponse("success",[course],null));
+        generateResponse("success",[user],null));
       console.log('Created');
     } else {
       console.log('ERROR: ' + err);
@@ -53,15 +55,17 @@ this.add('role:api,category:course,cmd:add', function(args,done){
   });
 })
 
-this.add('role:api,category:course,cmd:update', function(args,done){
-  Course.findById(args._id, function(err, course) {
-    course.name = args['req$'].body.name;
-    course.subjects = args.subjects;
+this.add('role:api,category:user,cmd:update', function(args,done){
+  User.findById(args._id, function(err, user) {
+    user.task = args.task;
+    user.student = args.student;
+	user.score = args.score;
+	user.data = args.data;
 
-    course.save(function(err) {
+    user.save(function(err) {
       if(!err) {
     done(null,
-      generateResponse("success",[course],null));
+      generateResponse("success",[user],null));
     console.log('Updated');
       } else {
     console.log('ERROR: ' + err);
@@ -72,11 +76,11 @@ this.add('role:api,category:course,cmd:update', function(args,done){
   });
 })
 
-this.add('role:api,category:course,cmd:delete', function(args,done){
+this.add('role:api,category:user,cmd:delete', function(args,done){
    console.log(args._id); 
-  Course.findById(args._id, function(err, course) {
-    if (course) {
-      course.remove(function(err) {
+  User.findById(args._id, function(err, user) {
+    if (user) {
+      user.remove(function(err) {
         if(!err) {
         console.log('Removed');
         done(null,
@@ -95,15 +99,15 @@ this.add('role:api,category:course,cmd:delete', function(args,done){
   });
 })
 
-this.add('init:course', init)
+this.add('init:user', init)
 
 function init(msg, respond) {
   this.act('role:web',{use:{
     // define some routes that start with /api
-    prefix: '/course',
+    prefix: '/user',
 
     // use action patterns where role has the value 'api' and cmd has some defined value
-    pin: {role:'api', category: 'course', cmd:'*'},
+    pin: {role:'api', category: 'user', cmd:'*'},
 
     // for each value of cmd, match some HTTP method, and use the
     // query parameters as values for the action
@@ -128,5 +132,5 @@ function generateResponse (status, content, message) {
 }
 
   
-  return 'course'
+  return 'user'
 }

@@ -59,13 +59,6 @@ http://localhost:3000/teacher/add
 http://localhost:3000/teacher/update/:id
 http://localhost:3000/teacher/delete/:id
 
-Usuarios:
-http://localhost:3000/user/findAll
-http://localhost:3000/user/findById/:id
-http://localhost:3000/user/add
-http://localhost:3000/user/update/:id
-http://localhost:3000/user/delete/:id
-
 
 Para consultar un restClient como el rest easy en firefox.
 
@@ -80,8 +73,8 @@ Admin Example:
 Course Example: 
 {
 	"name": "primero",
+	"subjects": ["56617b80ae5bc6580fac7efd","56583af9a0139514036bc3d4"]
 }
-	"subjects": [,] --> IDs del subject?? Por ahora no.
 
 Delivery Example: 
 {
@@ -97,10 +90,19 @@ Score Example:
    finalScore: 1
 }
 
+Student Example:
+{
+	"firstName": "Lola",
+	"surname": "Lopez",
+	"email": "lolalo@hotmail.com",
+	"password": "lolalo",
+	"subjects": ["56617b80ae5bc6580fac7efd"],
+	"tasks": ["56617b80ae5bc6580fac7efd"]
+}
+
 Subject Example: 
 {
   "name": "Mates",
-  "course": "56617975ae5bc6580fac7efb",
   "description": "Estudiaremos las base de toda ciencia",
   "temary"  : "Tema 1: sumas de números naturales. Tema 2: restas de números naturales."
 }
@@ -115,11 +117,12 @@ Task Example:
    "teacher": "56617882ae5bc6580fac7efa"
 }
 
-User Example: 
+Teacher Example:
 {
- "firstName":"Lola",
- "surname":"Lopez",
- "email":"lola@lola.com",
- "password":"secure123"
+	"firstName": "María",
+	"surname": "Padrón",
+	"email": "mariap@hotmail.com",
+	"password": "password",
+	"subjects": ["56617b80ae5bc6580fac7efd"]
 }
 
