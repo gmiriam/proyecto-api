@@ -39,7 +39,8 @@ this.add('role:api,category:task,cmd:add', function(args,done){
 	startDate:	args.startDate,
 	endDate: args.endDate,
 	maxScore: args.maxScore,
-	teacher: args.teacher
+	teacher: args.teacher,
+	subject: args.subject
   };
   var task = new Task(obj);
   console.log(task);
@@ -65,6 +66,7 @@ this.add('role:api,category:task,cmd:update', function(args,done){
 	task.endDate = args.endDate;
 	task.maxScore = args.maxScore;
 	task.teacher = args.teacher;
+	task.subject = args.subject;
 
     task.save(function(err) {
       if(!err) {

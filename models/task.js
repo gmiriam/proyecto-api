@@ -23,6 +23,9 @@ var taskSchema = Schema({
   },
   teacher: {
     type: String // ID
+  },
+  subject: {
+	  type: String //ID
   }
 });
 
