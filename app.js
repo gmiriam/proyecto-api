@@ -1,25 +1,16 @@
 var express = require('express'),
     seneca = require('seneca')(),
     session = require('express-session'),
-    CASAuthentication = require('cas-authentication'),
     app = express(),
     bodyParser  = require("body-parser"),
-    methodOverride = require("method-override");
-    mongoose = require('mongoose');
+    methodOverride = require("method-override"),
+    mongoose = require('mongoose'),
+    querystring = require('querystring'),
+    http = require('http');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride());
-app.use( session({
-    secret            : 'this app key',
-    resave            : false,
-    saveUninitialized : true
-}));
-
-var cas = new CASAuthentication({
-    cas_url     : 'http://localhost:8080/cas', 
-    service_url : 'http://localhost:3000/api'
-});
 
 mongoose.connect('mongodb://localhost/users', function(err, res) {
     if (err)
@@ -30,6 +21,51 @@ mongoose.connect('mongodb://localhost/users', function(err, res) {
 
 //*******************************************************
 
+app.get('/login', function (req,res){
+  var postOptions = {
+    host: 'localhost',
+    port: 3001,
+    path: '/oauth/token',
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic YXBwbGljYXRpb246c2VjcmV0'
+    }
+
+  };
+  var userName = req.query.usr,
+    password = req.query.pwd;
+
+  var usrDecoded = new Buffer(userName.toString(), 'base64').toString('ascii'),
+    pwdDecoded = new Buffer(password.toString(), 'base64').toString('ascii')
+  var postReq = http.request(postOptions, function(postRes) {
+      postRes.setEncoding('utf8');
+      postRes.on('data', function (chunk) {
+        var accessToken = JSON.parse(chunk).access_token;
+
+        var getOptions = {
+          host: 'localhost',
+          port: 3001,
+          path: '/',
+          method: 'GET',
+          headers: {
+              'Authorization': 'Bearer ' + accessToken
+          }
+        };
+        var getReq = http.request(getOptions, function(getRes) {
+          getRes.setEncoding('utf8');
+          getRes.on('data', function (chunk) {
+            res.send(chunk);
+          })
+        })
+        getReq.end();
+      });
+  });
+  postReq.write('grant_type=password&username='+usrDecoded +'&password=' +  pwdDecoded);
+  postReq.end();
+
+
+})
 
 seneca.use("plugins/admin", {})
 seneca.use("plugins/course", {})
