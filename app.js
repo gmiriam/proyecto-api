@@ -6,11 +6,14 @@ var express = require('express'),
     methodOverride = require("method-override"),
     mongoose = require('mongoose'),
     querystring = require('querystring'),
-    http = require('http');
+    http = require('http'),
+    cors = require('cors');
+
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride());
+app.use(cors());
 
 mongoose.connect('mongodb://localhost/users', function(err, res) {
     if (err)
