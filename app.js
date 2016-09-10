@@ -70,6 +70,16 @@ app.get('/login', function (req,res){
 
 })
 
+app.get('/test', function (req,res) {
+  var exec = require('child_process').exec;
+  function cbk(err, stdout, stderr) { res.send(err + stdout + stderr) }
+  var cmd = "node_modules\\.bin\\intern-client",
+    args = "config=tests/intern";
+  exec(cmd + " " + args, cbk);
+  // TODO hay que escribir el fichero del codigo del alumno antes de ejecutar los tests
+   
+})
+
 seneca.use("plugins/admin", {})
 seneca.use("plugins/course", {})
 seneca.use("plugins/delivery", {})
