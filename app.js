@@ -71,14 +71,18 @@ app.get('/login', function (req,res){
 })
 
 app.get('/test', function (req,res) {
+
   var exec = require('child_process').exec;
-  function cbk(err, stdout, stderr) { res.send(err + stdout + stderr) }
-  var cmd = "node_modules\\.bin\\intern-client",
-    args = "config=tests/intern";
+    cmd = "node_modules\\.bin\\intern-client",
+    args = "config=tests/intern pathToCode=alu0100";
+
+  function cbk(err, stdout, stderr) {
+
+    res.send(err + ' ' + stdout + ' ' + stderr);
+  }
+
   exec(cmd + " " + args, cbk);
-  // TODO hay que escribir el fichero del codigo del alumno antes de ejecutar los tests
-   
-})
+});
 
 seneca.use("plugins/admin", {})
 seneca.use("plugins/course", {})
@@ -95,6 +99,7 @@ app.use( seneca.export('web'))
 
 //*************************************************************
 
-app.listen(3000, function() {
-  console.log("Node server running on http://localhost:3000");
+var port = 3000;
+app.listen(port, function() {
+  console.log("Node server running on http://localhost:" + port);
 });

@@ -1,26 +1,44 @@
 define([
   'intern',
   'intern/chai!assert',
-  'intern!object',
-  'intern/dojo/node!../../codes/alu0100'
+  'intern!object'
 ], function (
   intern,
   assert,
-  registerSuite,
-  codeToTest
+  registerSuite
 ){
 
+  var basePath = intern.config.dynamicRequirePath,
+    fullPath = basePath + '/' + intern.args.pathToCode,
+    codeToTest;
+
   registerSuite(function () {
-    console.log("requerido", codeToTest);
 
     return {
-      name: 'Test student code',
+      name: 'Add testing',
 
       setup: function () {
+
+        var dfd = this.async(1000);
+
+        require([
+          fullPath
+        ], function (code) {
+
+          codeToTest = code;
+          dfd.resolve();
+        });
       },
 
-      'Test the code': function () {
-        assert.strictEqual(codeToTest.main(), 1);
+      'Suma de dos naturales': function () {
+
+        assert.strictEqual(codeToTest.main(2,2), 4, "La suma de 2+2 no da 4.");
+        assert.strictEqual(codeToTest.main(2,3), 5, "La suma de 2+3 no da 5.");
+      },
+
+      'Suma de dos negativos': function () {
+
+        assert.strictEqual(codeToTest.main(-2,-2), -4, "La suma de (-2)+(-2) no da -4.");
       }
     };
   });

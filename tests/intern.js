@@ -1,5 +1,9 @@
 
 define({
+
+	dynamicRequirePath: 'intern/dojo/node!../../../codes',
+
+
 	// Default desired capabilities for all environments. Individual capabilities can be overridden by any of the
 	// specified browser environments in the `environments` array below as well. See
 	// <https://theintern.github.io/intern/#option-capabilities> for links to the different capabilities options for
@@ -36,10 +40,7 @@ define({
 	// <https://theintern.github.io/intern/#option-useLoader> for more information.
 	loaderOptions: {
 		// Packages that should be registered with the loader in each testing environment
-		/*packages: [{
-			name: 'codes',
-			location: 'codes'
-		}]*/
+		packages: []
 	},
 
 	// Unit test suite(s) to run in each browser

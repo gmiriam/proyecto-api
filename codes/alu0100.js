@@ -1,12 +1,6 @@
 module.exports = {
-	main: function () {
+	main: function (a, b) {
 
-
-
-		return 1;
-
-
-
-
+		return a + b;
 	}
-}
+};
