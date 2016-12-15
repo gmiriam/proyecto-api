@@ -17,6 +17,8 @@
     "method-override": "*",
     "mongoose": "*",
     "morgan": "~1.3.0",
+    "multer": "^1.2.1",
+    "oauth2-server": "^2.4.1",
     "seneca": "^1.3.0",
     "serve-favicon": "~2.1.3"
   }
