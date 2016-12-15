@@ -105,6 +105,8 @@ app.get('/test', app.oauth.authorise(), checkUserMiddleware, function (req,res) 
 //*******************************************************
 
 var multer = require('multer');
+var unzip = require('unzip');
+var fs = require('fs');
 
 var storage = multer.diskStorage({ //multers disk storage settings
     destination: function (req, file, cb) {
@@ -135,7 +137,18 @@ app.post('/upload', function(req, res) {
            res.json({error_code:1,err_desc:err});
            return;
       }
-      var filename = file.filename;
+      var filename = file.filename,
+        filenameWithoutExtension = filename.split('.')[0];
+        path = file.destination,
+        fileMimeType = file.mimetype,
+        outputPath = path + "/" + filenameWithoutExtension;
+
+      if (fileMimeType === 'application/x-zip-compressed') {
+        fs.createReadStream(path + filename).pipe(unzip.Extract({
+          path: outputPath
+        }));
+      }
+
       res.json({error_code:0,err_desc:null,filename:filename});
   });
 });
