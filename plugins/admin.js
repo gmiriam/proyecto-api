@@ -1,5 +1,4 @@
 ﻿var mongoose = require('mongoose');
-var adminModel = require('../models/admin');
 var Admin = mongoose.model('admin');
 
 module.exports = function admin () {

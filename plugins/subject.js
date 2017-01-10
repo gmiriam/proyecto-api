@@ -1,5 +1,4 @@
 ﻿var mongoose = require('mongoose');
-var courseModel = require('../models/subject');
 var Subject = mongoose.model('subject');
 
 module.exports = function subject () {

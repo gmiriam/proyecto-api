@@ -107,14 +107,15 @@ app.get('/test', app.oauth.authorise(), checkUserMiddleware, function (req,res) 
 var multer = require('multer');
 var unzip = require('unzip');
 var fs = require('fs');
+var uuid = require('uuid/v4');
 
 var storage = multer.diskStorage({ //multers disk storage settings
     destination: function (req, file, cb) {
         cb(null, './data/');
     },
     filename: function (req, file, cb) {
-        var datetimestamp = Date.now();
-        cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1]);
+        var fileName = uuid();
+        cb(null, fileName + '.' + file.originalname.split('.')[file.originalname.split('.').length - 1]);
     }
 });
 
@@ -123,37 +124,62 @@ var upload = multer({ //multer settings
 }).single('file');
 
 app.use(function(req, res, next) { //allow cross origin requests
-        //res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
+        res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
         res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-        //res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         res.header("Access-Control-Allow-Credentials", true);
         next();
     });
 app.post('/upload', function(req, res) {
   upload(req,res,function(err){
-    var file = req.file;
-      console.log("fichero", file);
+    var file = req.file,
+      body = req.body,
+      fileTarget = body.fileTarget;
+
       if(err){
            res.json({error_code:1,err_desc:err});
            return;
       }
+
       var filename = file.filename,
         filenameWithoutExtension = filename.split('.')[0];
         path = file.destination,
         fileMimeType = file.mimetype,
-        outputPath = path + "/" + filenameWithoutExtension;
+        outputPath = path + "/";
 
-      if (fileMimeType === 'application/x-zip-compressed') {
-        fs.createReadStream(path + filename).pipe(unzip.Extract({
-          path: outputPath
-        }));
+      if (fileTarget === "statements") {
+
+      } else if (fileTarget === "tests") {
+
+      } else if (fileTarget === "deliveries") {
+
+        outputPath += fileTarget + "/" + filenameWithoutExtension;
+        if (fileMimeType === 'application/x-zip-compressed') {
+          fs.createReadStream(path + filename)
+            .pipe(unzip.Extract({
+              path: outputPath
+            }))
+            .on('finish', function () {
+              console.log("descomprimido, ahora hay que lanzar test");
+            });
+        }
       }
 
       res.json({error_code:0,err_desc:null,filename:filename});
   });
 });
 
+
 //*******************************************************
+require('./models/admin');
+require('./models/delivery');
+require('./models/course');
+require('./models/score');
+require('./models/student');
+require('./models/subject');
+require('./models/task');
+require('./models/teacher');
+
 
 seneca.use("plugins/admin", {})
 seneca.use("plugins/course", {})

@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-var courseModel = require('../models/course');
 var Course = mongoose.model('course');
 
 module.exports = function course () {

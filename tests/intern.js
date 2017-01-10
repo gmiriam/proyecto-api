@@ -1,7 +1,7 @@
 
 define({
 
-	dynamicRequirePath: 'intern/dojo/node!../../../codes',
+	dynamicRequirePath: 'intern/dojo/node!../../..',
 
 
 	// Default desired capabilities for all environments. Individual capabilities can be overridden by any of the
@@ -44,7 +44,7 @@ define({
 	},
 
 	// Unit test suite(s) to run in each browser
-	suites: [ 'tests/unit/test' ],
+	suites: [ ],
 
 	// Functional test suite(s) to execute against each browser once unit tests are completed
 	functionalSuites: [ /* 'myPackage/tests/functional' */ ],

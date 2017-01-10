@@ -1,6 +1,6 @@
 ﻿var mongoose = require('mongoose');
-var courseModel = require('../models/delivery');
 var Delivery = mongoose.model('delivery');
+var Task = mongoose.model('task');
 
 module.exports = function delivery () {
   
@@ -47,13 +47,40 @@ this.add('role:api,category:delivery,cmd:add', function(args,done){
       done(null,
         generateResponse("success",[delivery],null));
       console.log('Created');
+      findTaskAndRunTests(delivery);
     } else {
       console.log('ERROR: ' + err);
       done(err,
         generateResponse("error", err,null));
     }
   });
-})
+});
+
+function findTaskAndRunTests(delivery) {
+
+  console.log("llega", delivery);
+  var taskId = delivery.task;
+
+  Task.findById(taskId, function(err, task) {
+      if (!err) {
+        console.log("llego un task", task)
+        console.log("ya tengo ambos ficheros", delivery.data)
+        var exec = require('child_process').exec;
+          cmd = "node_modules\\.bin\\intern-client",
+          pathTo="data/",
+          args = "config=tests/intern suites=" + pathTo + task.evaluationTest.split(".")[0] + " pathToCode=" + pathTo + delivery.data.split(".")[0];  
+
+        function cbk(err, stdout, stderr) {
+
+          //res.send(err + ' ' + stdout + ' ' + stderr);
+          console.log(err + ' ' + stdout + ' ' + stderr);
+        }
+        console.log("args",args);
+        exec(cmd + " " + args, cbk);
+
+      } else {}
+  })
+}
 
 this.add('role:api,category:delivery,cmd:update', function(args,done){
   Delivery.findById(args._id, function(err, delivery) {
@@ -67,6 +94,7 @@ this.add('role:api,category:delivery,cmd:update', function(args,done){
     done(null,
       generateResponse("success",[delivery],null));
     console.log('Updated');
+      findTaskAndRunTests(delivery);
       } else {
     console.log('ERROR: ' + err);
       done(err,

@@ -26,6 +26,9 @@ var taskSchema = Schema({
   },
   subject: {
 	  type: String //ID
+  },
+  evaluationTest: {
+    type: String
   }
 });
 

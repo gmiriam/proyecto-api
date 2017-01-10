@@ -1,5 +1,4 @@
 ﻿var mongoose = require('mongoose');
-var courseModel = require('../models/score');
 var Score = mongoose.model('score');
 
 module.exports = function score () {

@@ -1,5 +1,4 @@
 ﻿var mongoose = require('mongoose');
-var courseModel = require('../models/task');
 var Task = mongoose.model('task');
 
 module.exports = function task () {
@@ -40,7 +39,8 @@ this.add('role:api,category:task,cmd:add', function(args,done){
 	endDate: args.endDate,
 	maxScore: args.maxScore,
 	teacher: args.teacher,
-	subject: args.subject
+	subject: args.subject,
+  evaluationTest: args.evaluationTest
   };
   var task = new Task(obj);
   console.log(task);
@@ -67,6 +67,7 @@ this.add('role:api,category:task,cmd:update', function(args,done){
 	task.maxScore = args.maxScore;
 	task.teacher = args.teacher;
 	task.subject = args.subject;
+  task.evaluationTest = args.evaluationTest;
 
     task.save(function(err) {
       if(!err) {
