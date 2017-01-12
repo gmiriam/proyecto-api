@@ -72,14 +72,32 @@ function findTaskAndRunTests(delivery) {
 
         function cbk(err, stdout, stderr) {
 
-          //res.send(err + ' ' + stdout + ' ' + stderr);
-          console.log(err + ' ' + stdout + ' ' + stderr);
+          if (!err) {
+            console.log(stdout);
+            var results = JSON.parse(stdout);
+            var score = getScore(task, results);
+            saveScore(delivery,score);
+          } else {
+            console.log(err);
+          }
         }
-        console.log("args",args);
+
         exec(cmd + " " + args, cbk);
 
       } else {}
   })
+}
+
+function getScore(task,results) {
+  var passTests = results.summary.pass,
+    totalTests = results.summary.total,
+    maxScore = task.maxScore;
+  return (passTests / totalTests) * maxScore;
+}
+
+function saveScore(delivery,score) {
+  delivery.score = score;
+  delivery.save();
 }
 
 this.add('role:api,category:delivery,cmd:update', function(args,done){
