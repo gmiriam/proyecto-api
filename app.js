@@ -8,7 +8,8 @@ var express = require('express'),
     querystring = require('querystring'),
     http = require('http'),
     //cors = require('cors'),
-    oauthserver = require('oauth2-server');
+    oauthserver = require('oauth2-server'),
+    childProcess = require('child_process');
 
 var port = 3002;
 
@@ -90,7 +91,7 @@ function checkUserMiddleware(req, res, next) {
 
 app.get('/test', app.oauth.authorise(), checkUserMiddleware, function (req,res) {
 
-  var exec = require('child_process').exec;
+  var exec = childProcess.exec;
     cmd = "node_modules\\.bin\\intern-client",
     args = "config=tests/intern pathToCode=alu0100";
 
@@ -111,6 +112,7 @@ var uuid = require('uuid/v4');
 
 var storage = multer.diskStorage({ //multers disk storage settings
     destination: function (req, file, cb) {
+    
         cb(null, './data/');
     },
     filename: function (req, file, cb) {
@@ -144,24 +146,52 @@ app.post('/upload', function(req, res) {
       var filename = file.filename,
         filenameWithoutExtension = filename.split('.')[0];
         path = file.destination,
-        fileMimeType = file.mimetype,
-        outputPath = path + "/";
+        fileMimeType = file.mimetype;
 
-      if (fileTarget === "statements") {
+      if (fileTarget === "attached") {
+        var exec = childProcess.exec;
+          cmd = "mv",
+          args = path + "/" + filename + " " + path + "/attachments/";
 
+        function cbk(err, stdout, stderr) {
+
+          console.log("err:", err, " stdout:", stdout, " stderr:", stderr);
+        }
+
+        exec(cmd + " " + args, cbk);
       } else if (fileTarget === "tests") {
+        var exec = childProcess.exec;
+          cmd = "mv",
+          args = path + "/" + filename + " " + path + "/tests/";
 
+        function cbk(err, stdout, stderr) {
+
+          console.log("err:", err, " stdout:", stdout, " stderr:", stderr);
+        }
+
+        exec(cmd + " " + args, cbk);
       } else if (fileTarget === "deliveries") {
 
-        outputPath += fileTarget + "/" + filenameWithoutExtension;
+        var outputPath = path + "/deliveries/" + filenameWithoutExtension;
         if (fileMimeType === 'application/x-zip-compressed') {
           fs.createReadStream(path + filename)
             .pipe(unzip.Extract({
               path: outputPath
             }))
             .on('finish', function () {
-              console.log("descomprimido, ahora hay que lanzar test");
+                var exec = childProcess.exec;
+                  cmd = "rm",
+                  args =  path + "/" + filename;
+
+                function cbk(err, stdout, stderr) {
+
+                  console.log("err:", err, " stdout:", stdout, " stderr:", stderr);
+                }
+
+                exec(cmd + " " + args, cbk);
             });
+          res.json({error_code:0,err_desc:null,filename:filenameWithoutExtension});
+          return;
         }
       }
 

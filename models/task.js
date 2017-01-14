@@ -29,6 +29,9 @@ var taskSchema = Schema({
   },
   evaluationTest: {
     type: String
+  },
+  attached: {
+    type: String
   }
 });
 

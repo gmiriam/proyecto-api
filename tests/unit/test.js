@@ -10,6 +10,7 @@ define([
 
   var basePath = intern.config.dynamicRequirePath,
     fullPath = basePath + '/' + intern.args.pathToCode,
+    filePath = fullPath + '/' + "alu0100",
     codeToTest;
 
   registerSuite(function () {
@@ -22,7 +23,7 @@ define([
         var dfd = this.async(1000);
 
         require([
-          fullPath
+          filePath
         ], function (code) {
 
           codeToTest = code;

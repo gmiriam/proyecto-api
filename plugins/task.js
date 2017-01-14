@@ -40,7 +40,8 @@ this.add('role:api,category:task,cmd:add', function(args,done){
 	maxScore: args.maxScore,
 	teacher: args.teacher,
 	subject: args.subject,
-  evaluationTest: args.evaluationTest
+  evaluationTest: args.evaluationTest,
+  attached: args.attached
   };
   var task = new Task(obj);
   console.log(task);
@@ -68,6 +69,7 @@ this.add('role:api,category:task,cmd:update', function(args,done){
 	task.teacher = args.teacher;
 	task.subject = args.subject;
   task.evaluationTest = args.evaluationTest;
+  task.attached = args.attached;
 
     task.save(function(err) {
       if(!err) {

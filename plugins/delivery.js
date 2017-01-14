@@ -67,8 +67,9 @@ function findTaskAndRunTests(delivery) {
         console.log("ya tengo ambos ficheros", delivery.data)
         var exec = require('child_process').exec;
           cmd = "node_modules\\.bin\\intern-client",
-          pathTo="data/",
-          args = "config=tests/intern suites=" + pathTo + task.evaluationTest.split(".")[0] + " pathToCode=" + pathTo + delivery.data.split(".")[0];  
+          pathToTest="data/tests/",
+          pathToCode="data/deliveries/",
+          args = "config=tests/intern suites=" + pathToTest + task.evaluationTest.split(".")[0] + " pathToCode=" + pathToCode + delivery.data.split(".")[0];  
 
         function cbk(err, stdout, stderr) {
 
