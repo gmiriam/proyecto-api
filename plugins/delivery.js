@@ -63,28 +63,29 @@ function findTaskAndRunTests(delivery) {
 
   Task.findById(taskId, function(err, task) {
       if (!err) {
-        console.log("llego un task", task)
-        console.log("ya tengo ambos ficheros", delivery.data)
-        var exec = require('child_process').exec;
-          cmd = "node_modules\\.bin\\intern-client",
-          pathToTest="data/tests/",
-          pathToCode="data/deliveries/",
-          args = "config=tests/intern suites=" + pathToTest + task.evaluationTest.split(".")[0] + " pathToCode=" + pathToCode + delivery.data.split(".")[0];  
+        if(task) {
+          console.log("llego un task", task)
+          console.log("ya tengo ambos ficheros", delivery.data)
+          var exec = require('child_process').exec;
+            cmd = "node_modules\\.bin\\intern-client",
+            pathToTest="data/tests/",
+            pathToCode="data/deliveries/",
+            args = "config=tests/intern suites=" + pathToTest + task.evaluationTest.split(".")[0] + " pathToCode=" + pathToCode + delivery.data.split(".")[0];  
 
-        function cbk(err, stdout, stderr) {
+          function cbk(err, stdout, stderr) {
 
-          if (!err) {
-            console.log(stdout);
-            var results = JSON.parse(stdout);
-            var score = getScore(task, results);
-            saveScore(delivery,score);
-          } else {
-            console.log(err);
+            if (!err) {
+              console.log(stdout);
+              var results = JSON.parse(stdout);
+              var score = getScore(task, results);
+              saveScore(delivery,score);
+            } else {
+              console.log(err);
+            }
           }
+
+          exec(cmd + " " + args, cbk);
         }
-
-        exec(cmd + " " + args, cbk);
-
       } else {}
   })
 }

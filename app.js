@@ -7,16 +7,16 @@ var express = require('express'),
     mongoose = require('mongoose'),
     querystring = require('querystring'),
     http = require('http'),
-    //cors = require('cors'),
-    oauthserver = require('oauth2-server'),
-    childProcess = require('child_process');
+    cors = require('cors'),
+    oauthserver = require('oauth2-server');
+
 
 var port = 3002;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride());
-//app.use(cors());
+app.use(cors());
 
 mongoose.connect('mongodb://localhost/users', function(err, res) {
     if (err)
@@ -104,103 +104,17 @@ app.get('/test', app.oauth.authorise(), checkUserMiddleware, function (req,res) 
 });
 
 //*******************************************************
+   /* app.use(function(req, res, next) { //allow cross origin requests
+            res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
+            res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.header("Access-Control-Allow-Credentials", true);
+            next();
+        });*/
 
-var multer = require('multer');
-var unzip = require('unzip');
-var fs = require('fs');
-var uuid = require('uuid/v4');
-
-var storage = multer.diskStorage({ //multers disk storage settings
-    destination: function (req, file, cb) {
-    
-        cb(null, './data/');
-    },
-    filename: function (req, file, cb) {
-        var fileName = uuid();
-        cb(null, fileName + '.' + file.originalname.split('.')[file.originalname.split('.').length - 1]);
-    }
-});
-
-var upload = multer({ //multer settings
-  storage: storage
-}).single('file');
-
-app.use(function(req, res, next) { //allow cross origin requests
-        res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
-        res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-        res.header("Access-Control-Allow-Credentials", true);
-        next();
-    });
-app.post('/upload', function(req, res) {
-  upload(req,res,function(err){
-    var file = req.file,
-      body = req.body,
-      fileTarget = body.fileTarget;
-
-      if(err){
-           res.json({error_code:1,err_desc:err});
-           return;
-      }
-
-      var filename = file.filename,
-        filenameWithoutExtension = filename.split('.')[0];
-        path = file.destination,
-        fileMimeType = file.mimetype;
-
-      if (fileTarget === "attached") {
-        var exec = childProcess.exec;
-          cmd = "mv",
-          args = path + "/" + filename + " " + path + "/attachments/";
-
-        function cbk(err, stdout, stderr) {
-
-          console.log("err:", err, " stdout:", stdout, " stderr:", stderr);
-        }
-
-        exec(cmd + " " + args, cbk);
-      } else if (fileTarget === "tests") {
-        var exec = childProcess.exec;
-          cmd = "mv",
-          args = path + "/" + filename + " " + path + "/tests/";
-
-        function cbk(err, stdout, stderr) {
-
-          console.log("err:", err, " stdout:", stdout, " stderr:", stderr);
-        }
-
-        exec(cmd + " " + args, cbk);
-      } else if (fileTarget === "deliveries") {
-
-        var outputPath = path + "/deliveries/" + filenameWithoutExtension;
-        if (fileMimeType === 'application/x-zip-compressed') {
-          fs.createReadStream(path + filename)
-            .pipe(unzip.Extract({
-              path: outputPath
-            }))
-            .on('finish', function () {
-                var exec = childProcess.exec;
-                  cmd = "rm",
-                  args =  path + "/" + filename;
-
-                function cbk(err, stdout, stderr) {
-
-                  console.log("err:", err, " stdout:", stdout, " stderr:", stderr);
-                }
-
-                exec(cmd + " " + args, cbk);
-            });
-          res.json({error_code:0,err_desc:null,filename:filenameWithoutExtension});
-          return;
-        }
-      }
-
-      res.json({error_code:0,err_desc:null,filename:filename});
-  });
-});
-
-
+seneca.use("plugins/upload",{app:app});
 //*******************************************************
+
 require('./models/admin');
 require('./models/delivery');
 require('./models/course');
