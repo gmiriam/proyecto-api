@@ -4,10 +4,10 @@ var Task = mongoose.model('task');
 module.exports = function task () {
   
   this.add('role:api,category:task,cmd:findAll', function(args,done){
-      Task.find(function(err, courses) {
+      Task.find(function(err, tasks) {
           if(!err) {
               done(null,
-                generateResponse("success",courses,null));
+                generateResponse("success",tasks,null));
           } else {
               console.log('ERROR: ' + err);
               done(err,

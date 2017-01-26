@@ -10,13 +10,6 @@ http://localhost:3000/admin/add
 http://localhost:3000/admin/update/:id
 http://localhost:3000/admin/delete/:id
 
-Cursos: 
-http://localhost:3000/course/findAll
-http://localhost:3000/course/findById/:id
-http://localhost:3000/course/add
-http://localhost:3000/course/update/:id
-http://localhost:3000/course/delete/:id
-
 Entregas:
 http://localhost:3000/delivery/findAll
 http://localhost:3000/delivery/findById/:id
@@ -70,11 +63,6 @@ Admin Example:
 	"password": "contraseña123"
 }
 
-Course Example: 
-{
-	"name": "primero",
-	"subjects": ["56617b80ae5bc6580fac7efd","56583af9a0139514036bc3d4"]
-}
 
 Delivery Example: 
 {

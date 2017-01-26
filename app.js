@@ -117,7 +117,6 @@ seneca.use("plugins/upload",{app:app});
 
 require('./models/admin');
 require('./models/delivery');
-require('./models/course');
 require('./models/score');
 require('./models/student');
 require('./models/subject');
@@ -126,10 +125,8 @@ require('./models/teacher');
 
 
 seneca.use("plugins/admin", {})
-seneca.use("plugins/course", {})
 seneca.use("plugins/delivery", {})
 seneca.use("plugins/score", {})
-seneca.use("plugins/course", {})
 seneca.use("plugins/student", {})
 seneca.use("plugins/subject", {})
 seneca.use("plugins/task", {})

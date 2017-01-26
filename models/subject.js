@@ -5,10 +5,6 @@ var subjectSchema = Schema({
   name: {
     type: String
   },
-  /*course: {
-    type: String,
-    validate: [courseValidator, 'Error: Curso no permitido.']
-  },*/
   description: {
     type: String 
   },
@@ -19,8 +15,4 @@ var subjectSchema = Schema({
 
 module.exports = mongoose.model('subject', subjectSchema);
 
-// Prueba
-function courseValidator(course) {
-  return course.length > 1;
-}
 

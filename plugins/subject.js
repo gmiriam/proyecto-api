@@ -4,10 +4,10 @@ var Subject = mongoose.model('subject');
 module.exports = function subject () {
   
 this.add('role:api,category:subject,cmd:findAll', function(args,done){
-    Subject.find(function(err, courses) {
+    Subject.find(function(err, subjects) {
         if(!err) {
             done(null,
-              generateResponse("success",courses,null));
+              generateResponse("success",subjects,null));
         } else {
             console.log('ERROR: ' + err);
             done(err,
@@ -56,9 +56,8 @@ this.add('role:api,category:subject,cmd:add', function(args,done){
 this.add('role:api,category:subject,cmd:update', function(args,done){
   Subject.findById(args._id, function(err, subject) {
     subject.name = args['req$'].body.name;
-    subject.course = args.course;
-	subject.description = args.description;
-	subject.temary = args.temary;
+	 subject.description = args.description;
+	 subject.temary = args.temary;
 
     subject.save(function(err) {
       if(!err) {

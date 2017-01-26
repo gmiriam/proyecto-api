@@ -4,10 +4,10 @@ var Score = mongoose.model('score');
 module.exports = function score () {
   
 this.add('role:api,category:score,cmd:findAll', function(args,done){
-    Score.find(function(err, courses) {
+    Score.find(function(err, scores) {
         if(!err) {
             done(null,
-              generateResponse("success",courses,null));
+              generateResponse("success",scores,null));
         } else {
             console.log('ERROR: ' + err);
             done(err,

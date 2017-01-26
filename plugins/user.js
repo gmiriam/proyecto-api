@@ -4,10 +4,10 @@ var User = mongoose.model('user');
 module.exports = function user () {
   
 this.add('role:api,category:user,cmd:findAll', function(args,done){
-    User.find(function(err, courses) {
+    User.find(function(err, users) {
         if(!err) {
             done(null,
-              generateResponse("success",courses,null));
+              generateResponse("success",users,null));
         } else {
             console.log('ERROR: ' + err);
             done(err,

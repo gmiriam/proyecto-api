@@ -4,10 +4,10 @@ var Student = mongoose.model('student');
 module.exports = function student () {
   
 this.add('role:api,category:student,cmd:findAll', function(args,done){
-    Student.find(function(err, courses) {
+    Student.find(function(err, students) {
         if(!err) {
             done(null,
-              generateResponse("success",courses,null));
+              generateResponse("success",students,null));
         } else {
             console.log('ERROR: ' + err);
             done(err,

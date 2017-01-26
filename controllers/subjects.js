@@ -33,7 +33,6 @@ exports.add = function(req, res) {
 
   var subject = new Subject({
     name:    req.body.name,
-    course:     req.body.course,
     description:  req.body.description,
     temary:   req.body.temary
   });
@@ -52,7 +51,6 @@ exports.add = function(req, res) {
 exports.update = function(req, res) {
   Subject.findById(req.params.id, function(err, subject) {
     subject.name = req.body.name;
-    subject.course = req.body.course;
     subject.description = req.body.description;
     subject.temary = req.body.temary;
 
