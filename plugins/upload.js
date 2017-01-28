@@ -8,38 +8,6 @@ module.exports = function upload (options) {
 
   var app = options.app;
 
-  this.add('role:api,category:upload', function(args,done){
-    var storage = multer.diskStorage({ //multers disk storage settings
-        destination: function (req, file, cb) {
-        
-            cb(null, './data/');
-        },
-        filename: function (req, file, cb) {
-            var fileName = uuid();
-            cb(null, fileName + '.' + file.originalname.split('.')[file.originalname.split('.').length - 1]);
-        }
-    });
-
-    var upload = multer({ //multer settings
-      storage: storage
-    }).single('file');
-
-
-    app.post('/upload', function(req, res) {
-      upload(req,res,function(err){
-        var file = req.file,
-          body = req.body,
-          fileTarget = body.fileTarget;
-          if(err){
-               res.json({error_code:1,err_desc:err});
-               return;
-          }
-        fileManagement(res,file,fileTarget);
-      });
-    });
-    done(null);
-  });
-
   function fileManagement(res,file,fileTarget) {
 
    var filename = file.filename,
@@ -93,7 +61,35 @@ function uncompressFile(path, filename, filenameWithoutExtension) {
   this.add('init:upload', init)
 
   function init(msg, respond) {
-    this.act({role:'api', category:'upload'});
+
+    var storage = multer.diskStorage({ //multers disk storage settings
+        destination: function (req, file, cb) {
+        
+            cb(null, './data/');
+        },
+        filename: function (req, file, cb) {
+            var fileName = uuid();
+            cb(null, fileName + '.' + file.originalname.split('.')[file.originalname.split('.').length - 1]);
+        }
+    });
+
+    var upload = multer({ //multer settings
+      storage: storage
+    }).single('file');
+
+    app.post('/upload', function(req, res) {
+      upload(req,res,function(err){
+        var file = req.file,
+          body = req.body,
+          fileTarget = body.fileTarget;
+          if(err){
+               res.json({error_code:1,err_desc:err});
+               return;
+          }
+        fileManagement(res,file,fileTarget);
+      });
+    });
+
     respond();
   }
 

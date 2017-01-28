@@ -1,143 +1,121 @@
-﻿var mongoose = require('mongoose');
-var Task = mongoose.model('task');
+﻿module.exports = function task(options) {
 
-module.exports = function task () {
-  
-  this.add('role:api,category:task,cmd:findAll', function(args,done){
-      Task.find(function(err, tasks) {
-          if(!err) {
-              done(null,
-                generateResponse("success",tasks,null));
-          } else {
-              console.log('ERROR: ' + err);
-              done(err,
-                generateResponse("error", err,null));
-          }
-      });
-  })
+	var mongoose = require('mongoose'),
+		Task = mongoose.model('task'),
+		app = options.app;
+	
+	this.add('role:api, category:task, cmd:findAll', function(args, done) {
 
-  this.add('role:api,category:task,cmd:findById', function(args,done){
-    Task.findById(args._id, function(err, task) {
-        if(!err) {
-          done(null,
-            generateResponse("success",[task],null));
-        } else {
-          console.log('ERROR: ' + err);
-          done(err,
-            generateResponse("error", err,null));
-        }
-      });
-  })
+		Task.find(function(err, tasks) {
 
-  this.add('role:api,category:task,cmd:add', function(args,done){
-    console.log('POST');
+			done(err, tasks);
+		});
+	});
 
-    var obj = {
-      name:    args['req$'].body.name,
-      statement:     args.statement,
-  	startDate:	args.startDate,
-  	endDate: args.endDate,
-  	maxScore: args.maxScore,
-  	teacher: args.teacher,
-  	subject: args.subject,
-    evaluationTest: args.evaluationTest,
-    attached: args.attached
-    };
-    var task = new Task(obj);
-    console.log(task);
+	this.add('role:api, category:task, cmd:findById', function(args, done) {
 
-    task.save(function(err) {
-      if(!err) {
-        done(null,
-          generateResponse("success",[task],null));
-        console.log('Created');
-      } else {
-        console.log('ERROR: ' + err);
-        done(err,
-          generateResponse("error", err,null));
-      }
-    });
-  })
+		var params = args.params,
+			id = params.id;
 
-  this.add('role:api,category:task,cmd:update', function(args,done){
-    Task.findById(args._id, function(err, task) {
-      task.name = args['req$'].body.name;
-      task.statement = args.statement;
-  	task.startDate = args.startDate;
-  	task.endDate = args.endDate;
-  	task.maxScore = args.maxScore;
-  	task.teacher = args.teacher;
-  	task.subject = args.subject;
-    task.evaluationTest = args.evaluationTest;
-    task.attached = args.attached;
+		Task.findById(id, function(err, task) {
 
-      task.save(function(err) {
-        if(!err) {
-      done(null,
-        generateResponse("success",[task],null));
-      console.log('Updated');
-        } else {
-      console.log('ERROR: ' + err);
-        done(err,
-          generateResponse("error", err,null));
-        }
-      });
-    });
-  })
+			if (err) {
+				done(err);
+			} else if (!task) {
+				done(new Error("Not found"));
+			} else {
+				done(null, [task]);
+			}
+		});
+	});
 
-  this.add('role:api,category:task,cmd:delete', function(args,done){
-     console.log(args._id); 
-    Task.findById(args._id, function(err, task) {
-      if (task) {
-        task.remove(function(err) {
-          if(!err) {
-          console.log('Removed');
-          done(null,
-            generateResponse("success",null,null));
-          } else {
-          console.log('ERROR: ' + err);
-          done(err, 
-            generateResponse("error", err,null));
-          }
-        })
-      }
-      else {
-        done(err, 
-          generateResponse("error", err, "No se ha encontrado el elemento que buscaba"));
-      }
-    });
-  })
+	this.add('role:api, category:task, cmd:create', function(args, done) {
 
-  this.add('init:task', init)
+		var body = args.body,
+			data = body.data,
+			task = new Task(data);
 
-  function init(msg, respond) {
-    this.act('role:web',{use:{
-      // define some routes that start with /api
-      prefix: '/task',
+		task.save(function(err) {
 
-      // use action patterns where role has the value 'api' and cmd has some defined value
-      pin: {role:'api', category: 'task', cmd:'*'},
+			done(err, [task]);
+		});
+	});
 
-      // for each value of cmd, match some HTTP method, and use the
-      // query parameters as values for the action
-      map:{
-        findAll: {GET:true},          // explicitly accepting GETs
-        findById: {GET: true, suffix: '/:_id'},
-        add: {POST: true},
-        update: {PUT: true, suffix: '/:_id'},
-        delete: {DELETE: true, suffix: '/:_id'}
-      }
-    }})
+	this.add('role:api, category:task, cmd:update', function(args, done) {
 
-    respond();
-  }
+		var params = args.params,
+			body = args.body,
+			id = params.id,
+			data = body.data;
 
-  function generateResponse (status, content, message) {
-    return {
-      "status" : status,
-      "content": content,
-      "message": message
-    }
-  }
-  return 'task'
+		Task.findById(id, function(err, task) {
+
+			if (err) {
+				done(err);
+			} else if (!task) {
+				done(new Error("Not found"));
+			} else {
+				for (var key in data) {
+					var newTaskPropertyValue = data[key];
+					task[key] = newTaskPropertyValue;
+				}
+
+				task.save(function(err) {
+
+					done(err, [task]);
+				});
+			}
+		});
+	});
+
+	this.add('role:api, category:task, cmd:delete', function(args, done) {
+
+		var params = args.params,
+			id = params.id;
+
+		Task.findById(id, function(err, task) {
+
+			if (err) {
+				done(err);
+			} else if (!task) {
+				done(new Error("Not found"));
+			} else {
+				task.remove(function(err) {
+
+					done(err);
+				});
+			}
+		});
+	});
+
+	this.add('init:task', function(args, done) {
+
+		function expressCbk(cmd, req, res) {
+
+			this.act('role:api, category:task, cmd:' + cmd, {
+				params: req.params,
+				headers: req.headers,
+				body: req.body
+			}, function(err, reply) {
+
+				this.act('role:api, category:generic, cmd:sendResponse', {
+					error: err,
+					responseData: reply,
+					responseHandler: res
+				});
+			});
+		}
+
+		var prefix = '/task/';
+
+		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'findAll'));
+		app.get(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'findById'));
+		app.post(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'create'));
+		app.put(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'update'));
+		app.delete(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'delete'));
+
+		done();
+	});
+
+	return 'task';
 }

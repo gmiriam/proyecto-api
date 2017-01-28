@@ -89,20 +89,6 @@ function checkUserMiddleware(req, res, next) {
   })
 }
 
-app.get('/test', app.oauth.authorise(), checkUserMiddleware, function (req,res) {
-
-  var exec = childProcess.exec;
-    cmd = "node_modules\\.bin\\intern-client",
-    args = "config=tests/intern pathToCode=alu0100";
-
-  function cbk(err, stdout, stderr) {
-
-    res.send(err + ' ' + stdout + ' ' + stderr);
-  }
-
-  exec(cmd + " " + args, cbk);
-});
-
 //*******************************************************
    /* app.use(function(req, res, next) { //allow cross origin requests
             res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
@@ -112,7 +98,6 @@ app.get('/test', app.oauth.authorise(), checkUserMiddleware, function (req,res) 
             next();
         });*/
 
-seneca.use("plugins/upload",{app:app});
 //*******************************************************
 
 require('./models/admin');
@@ -123,14 +108,16 @@ require('./models/subject');
 require('./models/task');
 require('./models/teacher');
 
-
-seneca.use("plugins/admin", {})
-seneca.use("plugins/delivery", {})
-seneca.use("plugins/score", {})
-seneca.use("plugins/student", {})
-seneca.use("plugins/subject", {})
-seneca.use("plugins/task", {})
-seneca.use("plugins/teacher", {})
+seneca
+  .use("plugins/generic")
+  .use("plugins/upload", { app:app })
+  .use("plugins/admin", {})
+  .use("plugins/delivery", {})
+  .use("plugins/score", {})
+  .use("plugins/student", {})
+  .use("plugins/subject", {})
+  .use("plugins/task", { app:app })
+  .use("plugins/teacher", {});
 
 app.use( seneca.export('web'))
 
