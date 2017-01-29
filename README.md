@@ -1,6 +1,12 @@
-1º.- Ejecutar Mongodb.
+# proyecto-api
 
-2º.- Ejecutar la aplicación con node app
+## Ejemplos de uso
+
+* 1º.- Ejecutar Mongodb.
+
+* 2º.- Ejecutar la aplicación con node app
+
+* 3º.- Consultar a una ruta
 
 Direcciones:
 Administradores: 

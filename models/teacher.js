@@ -1,9 +1,8 @@
 var mongoose = require('mongoose'),
-	userData = JSON.parse(JSON.stringify(require('./userData'))),
-    Schema = mongoose.Schema;
+	Schema = mongoose.Schema,
+	schemaInstance = Schema({
+		userId: String,
+		subjects: [String]
+	});
 
-userData.subjects = [String];
-
-var teacherSchema = Schema(userData);
-
-module.exports = mongoose.model('teacher', teacherSchema);
+module.exports = mongoose.model('teacher', schemaInstance);

@@ -1,9 +1,6 @@
 
 define({
-
-	dynamicRequirePath: 'intern/dojo/node!../../..',
-
-
+/*
 	// Default desired capabilities for all environments. Individual capabilities can be overridden by any of the
 	// specified browser environments in the `environments` array below as well. See
 	// <https://theintern.github.io/intern/#option-capabilities> for links to the different capabilities options for
@@ -47,7 +44,9 @@ define({
 	suites: [ ],
 
 	// Functional test suite(s) to execute against each browser once unit tests are completed
-	functionalSuites: [ /* 'myPackage/tests/functional' */ ],
+	functionalSuites: [ ],*/
+
+	dynamicRequirePath: 'intern/dojo/node!../../..',
 
 	reporters: [{
 		id: "tests/reporters/CustomReporter"

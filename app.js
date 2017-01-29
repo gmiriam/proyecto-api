@@ -1,41 +1,18 @@
 var express = require('express'),
-    seneca = require('seneca')(),
-    session = require('express-session'),
-    app = express(),
-    bodyParser  = require("body-parser"),
-    methodOverride = require("method-override"),
-    mongoose = require('mongoose'),
-    querystring = require('querystring'),
-    http = require('http'),
-    cors = require('cors'),
-    oauthserver = require('oauth2-server');
+	seneca = require('seneca')(),
+	bodyParser  = require("body-parser"),
+	methodOverride = require("method-override"),
+	http = require('http'),
+	cors = require('cors');
 
-
-var port = 3002;
+var port = 3002,
+	app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride());
 app.use(cors());
 
-mongoose.connect('mongodb://localhost/users', function(err, res) {
-    if (err)
-        console.log('Error:' + err);
-    else
-        console.log('Conectado a la base de datos');
-});
-
-
-//*******************************************************
-
-app.oauth = oauthserver({
-  model: require('./model.js'),
-  grants: ['password']
-});
-
-app.use(app.oauth.errorHandler());
-
-app.all('/oauth/token', app.oauth.grant());
 
 //*******************************************************
 
@@ -88,42 +65,25 @@ function checkUserMiddleware(req, res, next) {
     }
   })
 }
-
 //*******************************************************
-   /* app.use(function(req, res, next) { //allow cross origin requests
-            res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
-            res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            res.header("Access-Control-Allow-Credentials", true);
-            next();
-        });*/
-
-//*******************************************************
-
-require('./models/admin');
-require('./models/delivery');
-require('./models/score');
-require('./models/student');
-require('./models/subject');
-require('./models/task');
-require('./models/teacher');
 
 seneca
-  .use("plugins/generic")
-  .use("plugins/upload", { app:app })
-  .use("plugins/admin", {})
-  .use("plugins/delivery", {})
-  .use("plugins/score", {})
-  .use("plugins/student", {})
-  .use("plugins/subject", {})
-  .use("plugins/task", { app:app })
-  .use("plugins/teacher", {});
-
-app.use( seneca.export('web'))
-
-
-//*************************************************************
+	.use("plugins/generic")
+	.use("plugins/mongodb")
+	.ready(function(err) {
+		this
+			.use("plugins/oauth", { app:app })
+			.use("plugins/upload", { app:app })
+			.use("plugins/admin", {})
+			.use("plugins/delivery", {})
+			.use("plugins/score", {})
+			.use("plugins/student", {})
+			.use("plugins/subject", {})
+			.use("plugins/task", { app:app })
+			.use("plugins/teacher", {});
+	});
 
 app.listen(port, function() {
-  console.log("Node server running on http://localhost:" + port);
+
+	console.log("Node server running on http://localhost:" + port);
 });

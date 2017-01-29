@@ -4,43 +4,9 @@ var mongoose = require('mongoose');
  * Configuration.
  */
 
-var clientModel = require('./mongo/model/client'),
-	tokenModel = require('./mongo/model/token'),
-	userModel = require('./mongo/model/user');
-
-/**
- * Add example client and user to the database (for debug).
- */
-
-var loadExampleData = function() {
-
-	var client = new clientModel({
-		clientId: 'application',
-		clientSecret: 'secret'
-	});
-
-	var user = new userModel({
-		id: '123',
-		username: 'pedroetb',
-		password: 'password'
-	});
-
-	client.save(function(err, client) {
-
-		if (err) {
-			return console.error(err);
-		}
-		console.log('Created client', client);
-	});
-
-	user.save(function(err, user) {
-
-		if (err) {
-			return console.error(err);
-		}
-		console.log('Created user', user);
-	});
-};
+var clientModel = mongoose.model('client'),
+	tokenModel = mongoose.model('token'),
+	userModel = mongoose.model('user');
 
 /**
  * Dump the database content (for debug).
@@ -128,7 +94,7 @@ var saveAccessToken = function(accessToken, clientId, expires, user, callback) {
 var getUser = function(username, password, callback) {
 
 	userModel.findOne({
-		username: username,
+		email: username,
 		password: password
 	}, callback);
 };

@@ -1,19 +1,17 @@
 var mongoose = require('mongoose'),
-    Schema   = mongoose.Schema;
+	Schema = mongoose.Schema,
+	schemaInstance = Schema({
+		student: {
+			type: String
+		},
+		subject: {
+			type: String
+		},
+		finalScore: {
+			type: Number,
+			min: 0,
+			max: 100
+		}
+	});
 
-var scoreSchema = Schema({
-  student: {
-    type: String // ID
-  },
-  subject: {
-    type: String // ID
-  },
-  finalScore: {
-    type: Number,
-    min: 0,
-    max: 100
-  }
-});
-
-module.exports = mongoose.model('score', scoreSchema);
-
+module.exports = mongoose.model('score', schemaInstance);

@@ -1,7 +1,7 @@
 ﻿var mongoose = require('mongoose'),
-	userData = JSON.parse(JSON.stringify(require('./userData'))),
-  	Schema = mongoose.Schema;
+	Schema = mongoose.Schema,
+	schemaInstance = Schema({
+		userId: String
+	});
 
-var adminSchema = Schema(userData);
-
-module.exports = mongoose.model('admin', adminSchema);
+module.exports = mongoose.model('admin', schemaInstance);
