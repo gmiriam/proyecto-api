@@ -2,14 +2,39 @@
 
 	var mongoose = require('mongoose'),
 		Task = mongoose.model('task'),
+		Student = mongoose.model('student'),
 		app = options.app;
 	
 	this.add('role:api, category:task, cmd:findAll', function(args, done) {
 
-		Task.find(function(err, tasks) {
+		var query = args.query,
+			subjectId = query.subjectid,
+			studentId = query.studentid,
+			queryObj;
 
-			done(err, tasks);
-		});
+		if (studentId) {
+			Student.findById(studentId, 'tasks', function(err, student) {
+
+				var taskIds = student.tasks;
+
+				queryObj = Task.where('_id').in(taskIds)
+					.where('subject', subjectId);
+
+				Task.find(queryObj, function(err, tasks) {
+
+					done(err, tasks);
+				});
+			});
+		} else {
+			if (subjectId) {
+				queryObj.subject = subjectId;
+			}
+
+			Task.find(queryObj, function(err, tasks) {
+
+				done(err, tasks);
+			});
+		}
 	});
 
 	this.add('role:api, category:task, cmd:findById', function(args, done) {
@@ -94,6 +119,7 @@
 
 			this.act('role:api, category:task, cmd:' + cmd, {
 				params: req.params,
+				query: req.query,
 				headers: req.headers,
 				body: req.body
 			}, function(err, reply) {

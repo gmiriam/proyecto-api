@@ -74,13 +74,13 @@ seneca
 		this
 			.use("plugins/oauth", { app:app })
 			.use("plugins/upload", { app:app })
-			.use("plugins/admin", {})
-			.use("plugins/delivery", {})
-			.use("plugins/score", {})
-			.use("plugins/student", {})
-			.use("plugins/subject", {})
+			.use("plugins/admin", { app:app })
+			.use("plugins/delivery", { app:app })
+			.use("plugins/score", { app:app })
+			.use("plugins/student", { app:app })
+			.use("plugins/subject", { app:app })
 			.use("plugins/task", { app:app })
-			.use("plugins/teacher", {});
+			.use("plugins/teacher", { app:app });
 	});
 
 app.listen(port, function() {
