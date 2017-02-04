@@ -5,10 +5,13 @@ var mongoose = require('mongoose'),
 			type: String
 		},
 		description: {
-			type: String 
+			type: String
 		},
 		temary: {
 			type: String
+		},
+		teachers: {
+			type: [String]
 		}
 	});
 

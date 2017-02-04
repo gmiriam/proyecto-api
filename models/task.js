@@ -5,7 +5,7 @@ var mongoose = require('mongoose'),
 			type: String
 		},
 		statement: {
-			type: String 
+			type: String
 		},
 		startDate: {
 			type: Date

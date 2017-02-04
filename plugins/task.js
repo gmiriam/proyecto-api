@@ -2,20 +2,20 @@
 
 	var mongoose = require('mongoose'),
 		Task = mongoose.model('task'),
-		Student = mongoose.model('student'),
+		User = mongoose.model('user'),
 		app = options.app;
-	
+
 	this.add('role:api, category:task, cmd:findAll', function(args, done) {
 
 		var query = args.query,
 			subjectId = query.subjectid,
-			studentId = query.studentid,
+			userId = query.userid,
 			queryObj;
 
-		if (studentId) {
-			Student.findById(studentId, 'tasks', function(err, student) {
+		if (userId) {
+			User.findById(userId, 'tasks', function(err, user) {
 
-				var taskIds = student.tasks;
+				var taskIds = user.tasks;
 
 				queryObj = Task.where('_id').in(taskIds)
 					.where('subject', subjectId);

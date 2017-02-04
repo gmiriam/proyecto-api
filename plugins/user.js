@@ -1,135 +1,147 @@
-﻿var mongoose = require('mongoose');
-var User = mongoose.model('user');
+﻿module.exports = function user(options) {
 
-module.exports = function user () {
-  
-this.add('role:api,category:user,cmd:findAll', function(args,done){
-    User.find(function(err, users) {
-        if(!err) {
-            done(null,
-              generateResponse("success",users,null));
-        } else {
-            console.log('ERROR: ' + err);
-            done(err,
-              generateResponse("error", err,null));
-        }
-    });
-})
+	var mongoose = require('mongoose'),
+		User = mongoose.model('user'),
+		app = options.app;
 
-this.add('role:api,category:user,cmd:findById', function(args,done){
-  User.findById(args._id, function(err, user) {
-      if(!err) {
-        done(null,
-          generateResponse("success",[user],null));
-      } else {
-        console.log('ERROR: ' + err);
-        done(err,
-          generateResponse("error", err,null));
-      }
-    });
-})
+	this.add('role:api, category:user, cmd:findAll', function(args, done) {
 
-this.add('role:api,category:user,cmd:add', function(args,done){
-  console.log('POST');
+		var query = args.query,
+			role = query.role,
+			enrolledSubjectId = query.enrolledsubjectid,
+			queryObj;
 
-  var obj = {
-    task:    args.task,
-    student:     args.student,
-	score:	args.score,
-	data: args.data
-  };
-  var user = new User(obj);
-  console.log(user);
+		if (role) {
+			if (role === 'student') {
+				queryObj = {
+					'$or': [{
+						'role': 'student'
+					},{
+						'enrolledSubjects.0': {
+							'$exists': true
+						}
+					}]
+				};
+			} else {
+				queryObj = { 'role': role };
+			}
+		}
 
-  user.save(function(err) {
-    if(!err) {
-      done(null,
-        generateResponse("success",[user],null));
-      console.log('Created');
-    } else {
-      console.log('ERROR: ' + err);
-      done(err,
-        generateResponse("error", err,null));
-    }
-  });
-})
+		if (enrolledSubjectId) {
+			queryObj = { 'enrolledSubjects': enrolledSubjectId };
+		}
 
-this.add('role:api,category:user,cmd:update', function(args,done){
-  User.findById(args._id, function(err, user) {
-    user.task = args.task;
-    user.student = args.student;
-	user.score = args.score;
-	user.data = args.data;
+		User.find(queryObj, function(err, users) {
 
-    user.save(function(err) {
-      if(!err) {
-    done(null,
-      generateResponse("success",[user],null));
-    console.log('Updated');
-      } else {
-    console.log('ERROR: ' + err);
-      done(err,
-        generateResponse("error", err,null));
-      }
-    });
-  });
-})
+			done(err, users);
+		});
+	});
 
-this.add('role:api,category:user,cmd:delete', function(args,done){
-   console.log(args._id); 
-  User.findById(args._id, function(err, user) {
-    if (user) {
-      user.remove(function(err) {
-        if(!err) {
-        console.log('Removed');
-        done(null,
-          generateResponse("success",null,null));
-        } else {
-        console.log('ERROR: ' + err);
-        done(err, 
-          generateResponse("error", err,null));
-        }
-      })
-    }
-    else {
-      done(err, 
-        generateResponse("error", err, "No se ha encontrado el elemento que buscaba"));
-    }
-  });
-})
+	this.add('role:api, category:user, cmd:findById', function(args, done) {
 
-this.add('init:user', init)
+		var params = args.params,
+			id = params.id;
 
-function init(msg, respond) {
-  this.act('role:web',{use:{
-    // define some routes that start with /api
-    prefix: '/user',
+		User.findById(id, function(err, user) {
 
-    // use action patterns where role has the value 'api' and cmd has some defined value
-    pin: {role:'api', category: 'user', cmd:'*'},
+			if (err) {
+				done(err);
+			} else if (!user) {
+				done(new Error("Not found"));
+			} else {
+				done(null, [user]);
+			}
+		});
+	});
 
-    // for each value of cmd, match some HTTP method, and use the
-    // query parameters as values for the action
-    map:{
-      findAll: {GET:true},          // explicitly accepting GETs
-      findById: {GET: true, suffix: '/:_id'},
-      add: {POST: true},
-      update: {PUT: true, suffix: '/:_id'},
-      delete: {DELETE: true, suffix: '/:_id'}
-    }
-  }})
+	this.add('role:api, category:user, cmd:create', function(args, done) {
 
-  respond();
-}
+		var body = args.body,
+			data = body.data,
+			user = new User(data);
 
-function generateResponse (status, content, message) {
-  return {
-    "status" : status,
-    "content": content,
-    "message": message
-  }
-}
+		user.save(function(err) {
 
-  
-  return 'user'
+			done(err, [user]);
+		});
+	});
+
+	this.add('role:api, category:user, cmd:update', function(args, done) {
+
+		var params = args.params,
+			body = args.body,
+			id = params.id,
+			data = body.data;
+
+		User.findById(id, function(err, user) {
+
+			if (err) {
+				done(err);
+			} else if (!user) {
+				done(new Error("Not found"));
+			} else {
+				for (var key in data) {
+					var newUserPropertyValue = data[key];
+					user[key] = newUserPropertyValue;
+				}
+
+				user.save(function(err) {
+
+					done(err, [user]);
+				});
+			}
+		});
+	});
+
+	this.add('role:api, category:user, cmd:delete', function(args, done) {
+
+		var params = args.params,
+			id = params.id;
+
+		User.findById(id, function(err, user) {
+
+			if (err) {
+				done(err);
+			} else if (!user) {
+				done(new Error("Not found"));
+			} else {
+				user.remove(function(err) {
+
+					done(err);
+				});
+			}
+		});
+	});
+
+	this.add('init:user', function(args, done) {
+
+		function expressCbk(cmd, req, res) {
+
+			this.act('role:api, category:user, cmd:' + cmd, {
+				params: req.params,
+				query: req.query,
+				headers: req.headers,
+				body: req.body
+			}, function(err, reply) {
+
+				this.act('role:api, category:generic, cmd:sendResponse', {
+					error: err,
+					responseData: reply,
+					responseHandler: res
+				});
+			});
+		}
+
+		var prefix = '/user/';
+
+		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'findAll'));
+		app.get(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'findById'));
+		app.post(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'create'));
+		app.put(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'update'));
+		app.delete(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'delete'));
+
+		done();
+	});
+
+	return 'user';
 }

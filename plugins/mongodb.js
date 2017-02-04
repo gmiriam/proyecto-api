@@ -17,9 +17,6 @@
 		require('../models/token');
 
 		require('../models/user');
-		require('../models/admin');
-		require('../models/teacher');
-		require('../models/student');
 
 		require('../models/subject');
 		require('../models/task');

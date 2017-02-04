@@ -1,6 +1,6 @@
 var mongoose = require('mongoose'),
 	Schema = mongoose.Schema,
-	userSchema = require('./schema/userSchema'),
+	userSchema = require('./schemas/user'),
 	schemaInstance = Schema({
 		accessToken: String,
 		expires: Date,

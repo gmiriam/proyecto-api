@@ -120,16 +120,59 @@
 	this.add('role:api, category:student, cmd:update', function(args, done) {
 
 		var params = args.params,
+			studentId = params.id,
 			body = args.body,
-			id = params.id,
-			data = body.data;
+			data = body.data,
+			userId = data.userId,
+
+			resolveUserPromise,
+			rejectUserPromise,
+			userPromise = new Promise(function(resolve, reject) {
+				resolveUserPromise = resolve;
+				rejectUserPromise = reject;
+			}),
+			resolveStudentPromise,
+			rejectStudentPromise,
+			studentPromise = new Promise(function(resolve, reject) {
+				resolveStudentPromise = resolve;
+				rejectStudentPromise = reject;
+			});
+
+		Promise.all([userPromise, studentPromise]).then(function(values) {
+			done(err, values);
+		}).catch(function(reason) {
+			done(reason);
+		});
+
+		User.findById(userId, function(err, user) {
+
+			if (err) {
+				rejectUserPromise(err);
+			} else if (!student) {
+				rejectUserPromise(new Error("Not found"));
+			} else {
+				for (var key in data) {
+					var newUserPropertyValue = data[key];
+					user[key] = newUserPropertyValue;
+				}
+
+				user.save(function(err) {
+
+					if (err) {
+						rejectUserPromise(err);
+					} else {
+						resolveUserPromise(user);
+					}
+				});
+			}
+		});
 
 		Student.findById(id, function(err, student) {
 
 			if (err) {
-				done(err);
+				rejectStudentPromise(err);
 			} else if (!student) {
-				done(new Error("Not found"));
+				rejectStudentPromise(new Error("Not found"));
 			} else {
 				for (var key in data) {
 					var newStudentPropertyValue = data[key];
@@ -138,7 +181,11 @@
 
 				student.save(function(err) {
 
-					done(err, [student]);
+					if (err) {
+						rejectStudentPromise(err);
+					} else {
+						resolveStudentPromise(student);
+					}
 				});
 			}
 		});
