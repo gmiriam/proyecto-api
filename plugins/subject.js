@@ -1,133 +1,147 @@
-﻿var mongoose = require('mongoose');
-var Subject = mongoose.model('subject');
+﻿module.exports = function subject(options) {
 
-module.exports = function subject () {
-  
-this.add('role:api,category:subject,cmd:findAll', function(args,done){
-    Subject.find(function(err, subjects) {
-        if(!err) {
-            done(null,
-              generateResponse("success",subjects,null));
-        } else {
-            console.log('ERROR: ' + err);
-            done(err,
-              generateResponse("error", err,null));
-        }
-    });
-})
+	var mongoose = require('mongoose'),
+		Subject = mongoose.model('subject'),
+		User = mongoose.model('user'),
+		app = options.app;
 
-this.add('role:api,category:subject,cmd:findById', function(args,done){
-  Subject.findById(args._id, function(err, subject) {
-      if(!err) {
-        done(null,
-          generateResponse("success",[subject],null));
-      } else {
-        console.log('ERROR: ' + err);
-        done(err,
-          generateResponse("error", err,null));
-      }
-    });
-})
+	this.add('role:api, category:subject, cmd:findAll', function(args, done) {
 
-this.add('role:api,category:subject,cmd:add', function(args,done){
-  console.log('POST');
+		var query = args.query,
+			subjectId = query.subjectid,
+			userId = query.userid,
+			queryObj;
 
-  var obj = {
-    name:    args['req$'].body.name,
-	description:	args.description,
-	temary: args.temary
-  };
-  var subject = new Subject(obj);
-  console.log(subject);
+		if (userId) {
+			User.findById(userId, 'subjects', function(err, user) {
 
-  subject.save(function(err) {
-    if(!err) {
-      done(null,
-        generateResponse("success",[subject],null));
-      console.log('Created');
-    } else {
-      console.log('ERROR: ' + err);
-      done(err,
-        generateResponse("error", err,null));
-    }
-  });
-})
+				var subjectIds = user.subjects;
 
-this.add('role:api,category:subject,cmd:update', function(args,done){
-  Subject.findById(args._id, function(err, subject) {
-    subject.name = args['req$'].body.name;
-	 subject.description = args.description;
-	 subject.temary = args.temary;
+				queryObj = Subject.where('_id').in(subjectIds)
+					.where('subject', subjectId);
 
-    subject.save(function(err) {
-      if(!err) {
-    done(null,
-      generateResponse("success",[subject],null));
-    console.log('Updated');
-      } else {
-    console.log('ERROR: ' + err);
-      done(err,
-        generateResponse("error", err,null));
-      }
-    });
-  });
-})
+				Subject.find(queryObj, function(err, subjects) {
 
-this.add('role:api,category:subject,cmd:delete', function(args,done){
-   console.log(args._id); 
-  Subject.findById(args._id, function(err, subject) {
-    if (subject) {
-      subject.remove(function(err) {
-        if(!err) {
-        console.log('Removed');
-        done(null,
-          generateResponse("success",null,null));
-        } else {
-        console.log('ERROR: ' + err);
-        done(err, 
-          generateResponse("error", err,null));
-        }
-      })
-    }
-    else {
-      done(err, 
-        generateResponse("error", err, "No se ha encontrado el elemento que buscaba"));
-    }
-  });
-})
+					done(err, subjects);
+				});
+			});
+		} else {
+			if (subjectId) {
+				queryObj.subject = subjectId;
+			}
 
-this.add('init:subject', init)
+			Subject.find(queryObj, function(err, subjects) {
 
-function init(msg, respond) {
-  this.act('role:web',{use:{
-    // define some routes that start with /api
-    prefix: '/subject',
+				done(err, subjects);
+			});
+		}
+	});
 
-    // use action patterns where role has the value 'api' and cmd has some defined value
-    pin: {role:'api', category: 'subject', cmd:'*'},
+	this.add('role:api, category:subject, cmd:findById', function(args, done) {
 
-    // for each value of cmd, match some HTTP method, and use the
-    // query parameters as values for the action
-    map:{
-      findAll: {GET:true},          // explicitly accepting GETs
-      findById: {GET: true, suffix: '/:_id'},
-      add: {POST: true},
-      update: {PUT: true, suffix: '/:_id'},
-      delete: {DELETE: true, suffix: '/:_id'}
-    }
-  }})
+		var params = args.params,
+			id = params.id;
 
-  respond();
-}
+		Subject.findById(id, function(err, subject) {
 
-function generateResponse (status, content, message) {
-  return {
-    "status" : status,
-    "content": content,
-    "message": message
-  }
-}
+			if (err) {
+				done(err);
+			} else if (!subject) {
+				done(new Error("Not found"));
+			} else {
+				done(null, [subject]);
+			}
+		});
+	});
 
-  
-  return 'subject'
+	this.add('role:api, category:subject, cmd:create', function(args, done) {
+
+		var body = args.body,
+			data = body.data,
+			subject = new Subject(data);
+
+		subject.save(function(err) {
+
+			done(err, [subject]);
+		});
+	});
+
+	this.add('role:api, category:subject, cmd:update', function(args, done) {
+
+		var params = args.params,
+			body = args.body,
+			id = params.id,
+			data = body.data;
+
+		Subject.findById(id, function(err, subject) {
+
+			if (err) {
+				done(err);
+			} else if (!subject) {
+				done(new Error("Not found"));
+			} else {
+				for (var key in data) {
+					var newSubjectPropertyValue = data[key];
+					subject[key] = newSubjectPropertyValue;
+				}
+
+				subject.save(function(err) {
+
+					done(err, [subject]);
+				});
+			}
+		});
+	});
+
+	this.add('role:api, category:subject, cmd:delete', function(args, done) {
+
+		var params = args.params,
+			id = params.id;
+
+		Subject.findById(id, function(err, subject) {
+
+			if (err) {
+				done(err);
+			} else if (!subject) {
+				done(new Error("Not found"));
+			} else {
+				subject.remove(function(err) {
+
+					done(err);
+				});
+			}
+		});
+	});
+
+	this.add('init:subject', function(args, done) {
+
+		function expressCbk(cmd, req, res) {
+
+			this.act('role:api, category:subject, cmd:' + cmd, {
+				params: req.params,
+				query: req.query,
+				headers: req.headers,
+				body: req.body
+			}, function(err, reply) {
+
+				this.act('role:api, category:generic, cmd:sendResponse', {
+					error: err,
+					responseData: reply,
+					responseHandler: res
+				});
+			});
+		}
+
+		var prefix = '/subject/';
+
+		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'findAll'));
+		app.get(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'findById'));
+		app.post(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'create'));
+		app.put(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'update'));
+		app.delete(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'delete'));
+
+		done();
+	});
+
+	return 'subject';
 }
