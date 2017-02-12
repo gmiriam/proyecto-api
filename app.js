@@ -73,6 +73,7 @@ seneca
 	.ready(function(err) {
 		this
 			.use("plugins/oauth", { app:app })
+			.use("plugins/download", { app:app })
 			.use("plugins/upload", { app:app })
 			.use("plugins/user", { app:app })
 			.use("plugins/delivery", { app:app })

@@ -1,184 +1,178 @@
-﻿var mongoose = require('mongoose');
-var Delivery = mongoose.model('delivery');
-var Task = mongoose.model('task');
+﻿module.exports = function delivery(options) {
 
-module.exports = function delivery () {
-  
-this.add('role:api,category:delivery,cmd:findAll', function(args,done){
-    Delivery.find(function(err, deliveries) {
-        if(!err) {
-            done(null,
-              generateResponse("success",deliveries,null));
-        } else {
-            console.log('ERROR: ' + err);
-            done(err,
-              generateResponse("error", err,null));
-        }
-    });
-})
+	var mongoose = require('mongoose'),
+		ChildProcess = require('child_process'),
+		Delivery = mongoose.model('delivery'),
+		app = options.app;
 
-this.add('role:api,category:delivery,cmd:findById', function(args,done){
-  Delivery.findById(args._id, function(err, delivery) {
-      if(!err) {
-        done(null,
-          generateResponse("success",[delivery],null));
-      } else {
-        console.log('ERROR: ' + err);
-        done(err,
-          generateResponse("error", err,null));
-      }
-    });
-})
+	this.add('role:api, category:delivery, cmd:findAll', function(args, done) {
 
-this.add('role:api,category:delivery,cmd:add', function(args,done){
-  console.log('POST');
+		var query = args.query,
+			queryObj;
 
-  var obj = {
-    task:    args.task,
-    student:     args.student,
-	score:	args.score,
-	data: args.data
-  };
-  var delivery = new Delivery(obj);
-  console.log(delivery);
 
-  delivery.save(function(err) {
-    if(!err) {
-      done(null,
-        generateResponse("success",[delivery],null));
-      console.log('Created');
-      findTaskAndRunTests(delivery);
-    } else {
-      console.log('ERROR: ' + err);
-      done(err,
-        generateResponse("error", err,null));
-    }
-  });
-});
+		Delivery.find(queryObj, function(err, deliveries) {
 
-function findTaskAndRunTests(delivery) {
+			done(err, deliveries);
+		});
+	});
 
-  console.log("llega", delivery);
-  var taskId = delivery.task;
+	this.add('role:api, category:delivery, cmd:findById', function(args, done) {
 
-  Task.findById(taskId, function(err, task) {
-      if (!err) {
-        if(task) {
-          console.log("llego un task", task)
-          console.log("ya tengo ambos ficheros", delivery.data)
-          var exec = require('child_process').exec;
-            cmd = "node_modules\\.bin\\intern-client",
-            pathToTest="data/tests/",
-            pathToCode="data/deliveries/",
-            args = "config=tests/intern suites=" + pathToTest + task.evaluationTest.split(".")[0] + " pathToCode=" + pathToCode + delivery.data.split(".")[0];  
+		var params = args.params,
+			id = params.id;
 
-          function cbk(err, stdout, stderr) {
+		Delivery.findById(id, function(err, delivery) {
 
-            if (!err) {
-              console.log(stdout);
-              var results = JSON.parse(stdout);
-              var score = getScore(task, results);
-              saveScore(delivery,score);
-            } else {
-              console.log(err);
-            }
-          }
+			if (err) {
+				done(err);
+			} else if (!delivery) {
+				done(new Error("Not found"));
+			} else {
+				done(null, [delivery]);
+			}
+		});
+	});
 
-          exec(cmd + " " + args, cbk);
-        }
-      } else {}
-  })
-}
+	this.add('role:api, category:delivery, cmd:create', function(args, done) {
 
-function getScore(task,results) {
-  var passTests = results.summary.pass,
-    totalTests = results.summary.total,
-    maxScore = task.maxScore;
-  return (passTests / totalTests) * maxScore;
-}
+		var body = args.body,
+			data = body.data,
+			delivery = new Delivery(data);
 
-function saveScore(delivery,score) {
-  delivery.score = score;
-  delivery.save();
-}
+		delivery.save(function(err) {
 
-this.add('role:api,category:delivery,cmd:update', function(args,done){
-  Delivery.findById(args._id, function(err, delivery) {
-    delivery.task = args.task;
-    delivery.student = args.student;
-	delivery.score = args.score;
-	delivery.data = args.data;
+			done(err, [delivery]);
+		});
+	});
 
-    delivery.save(function(err) {
-      if(!err) {
-    done(null,
-      generateResponse("success",[delivery],null));
-    console.log('Updated');
-      findTaskAndRunTests(delivery);
-      } else {
-    console.log('ERROR: ' + err);
-      done(err,
-        generateResponse("error", err,null));
-      }
-    });
-  });
-})
+	this.add('role:api, category:delivery, cmd:update', function(args, done) {
 
-this.add('role:api,category:delivery,cmd:delete', function(args,done){
-   console.log(args._id); 
-  Delivery.findById(args._id, function(err, delivery) {
-    if (delivery) {
-      delivery.remove(function(err) {
-        if(!err) {
-        console.log('Removed');
-        done(null,
-          generateResponse("success",null,null));
-        } else {
-        console.log('ERROR: ' + err);
-        done(err, 
-          generateResponse("error", err,null));
-        }
-      })
-    }
-    else {
-      done(err, 
-        generateResponse("error", err, "No se ha encontrado el elemento que buscaba"));
-    }
-  });
-})
+		var params = args.params,
+			body = args.body,
+			id = params.id,
+			data = body.data;
 
-this.add('init:delivery', init)
+		Delivery.findById(id, function(err, delivery) {
 
-function init(msg, respond) {
-  this.act('role:web',{use:{
-    // define some routes that start with /api
-    prefix: '/delivery',
+			if (err) {
+				done(err);
+			} else if (!delivery) {
+				done(new Error("Not found"));
+			} else {
+				for (var key in data) {
+					var newDeliveryPropertyValue = data[key];
+					delivery[key] = newDeliveryPropertyValue;
+				}
 
-    // use action patterns where role has the value 'api' and cmd has some defined value
-    pin: {role:'api', category: 'delivery', cmd:'*'},
+				delivery.save(function(err) {
 
-    // for each value of cmd, match some HTTP method, and use the
-    // query parameters as values for the action
-    map:{
-      findAll: {GET:true},          // explicitly accepting GETs
-      findById: {GET: true, suffix: '/:_id'},
-      add: {POST: true},
-      update: {PUT: true, suffix: '/:_id'},
-      delete: {DELETE: true, suffix: '/:_id'}
-    }
-  }})
+					this.act('role:api, category:task, cmd:findById', {
+						params: { id: delivery.task }
+					}, function(err, reply) {
 
-  respond();
-}
+						var task = reply[0];
+						this.act('role:api, category:delivery, cmd:runTest', {
+							delivery: delivery,
+							task: task
+						});
+					});
 
-function generateResponse (status, content, message) {
-  return {
-    "status" : status,
-    "content": content,
-    "message": message
-  }
-}
+					done(err, [delivery]);
+				});
+			}
+		});
+	});
 
-  
-  return 'delivery'
+	this.add('role:api, category:delivery, cmd:delete', function(args, done) {
+
+		var params = args.params,
+			id = params.id;
+
+		Delivery.findById(id, function(err, delivery) {
+
+			if (err) {
+				done(err);
+			} else if (!delivery) {
+				done(new Error("Not found"));
+			} else {
+				delivery.remove(function(err) {
+
+					done(err);
+				});
+			}
+		});
+	});
+
+	this.add('role:api, category:delivery, cmd:runTest', function(args, done) {
+
+		var params = args.params,
+			id = params.id,
+
+			exec = ChildProcess.exec;
+			cmd = "node_modules\\.bin\\intern-client",
+			pathToTest = "data/tests/",
+			pathToCode = "data/deliveries/",
+
+			suites = pathToTest + task.evaluationTest.split(".")[0],
+			code = pathToCode + delivery.data.split(".")[0],
+			execArgs = "config=tests/intern suites=" + suites + " pathToCode=" + code;
+
+			function getScore(task, results) {
+
+				var passTests = results.summary.pass,
+					totalTests = results.summary.total,
+					maxScore = task.maxScore;
+
+				return (passTests / totalTests) * maxScore;
+			}
+
+			function cbk(err, stdout, stderr) {
+
+				if (!err) {
+					console.log(stdout);
+					var results = JSON.parse(stdout),
+						score = getScore(task, results);
+
+					delivery.score = score;
+					delivery.save();
+				}
+
+				done(err);
+			}
+
+			exec(cmd + " " + execArgs, cbk);
+	});
+
+	this.add('init:delivery', function(args, done) {
+
+		function expressCbk(cmd, req, res) {
+
+			this.act('role:api, category:delivery, cmd:' + cmd, {
+				params: req.params,
+				query: req.query,
+				headers: req.headers,
+				body: req.body
+			}, function(err, reply) {
+
+				this.act('role:api, category:generic, cmd:sendResponse', {
+					error: err,
+					responseData: reply,
+					responseHandler: res
+				});
+			});
+		}
+
+		var prefix = '/delivery/';
+
+		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'findAll'));
+		app.get(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'findById'));
+		app.post(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'create'));
+		app.put(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'update'));
+		app.delete(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'delete'));
+
+		done();
+	});
+
+	return 'delivery';
 }
