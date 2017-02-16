@@ -8,8 +8,12 @@
 	this.add('role:api, category:delivery, cmd:findAll', function(args, done) {
 
 		var query = args.query,
+			taskId = query.taskid,
 			queryObj;
 
+		if (taskId) {
+			queryObj = { task: taskId };
+		}
 
 		Delivery.find(queryObj, function(err, deliveries) {
 
@@ -51,7 +55,8 @@
 		var params = args.params,
 			body = args.body,
 			id = params.id,
-			data = body.data;
+			data = body.data,
+			self = this;
 
 		Delivery.findById(id, function(err, delivery) {
 
@@ -67,12 +72,12 @@
 
 				delivery.save(function(err) {
 
-					this.act('role:api, category:task, cmd:findById', {
+					self.act('role:api, category:task, cmd:findById', {
 						params: { id: delivery.task }
 					}, function(err, reply) {
 
 						var task = reply[0];
-						this.act('role:api, category:delivery, cmd:runTest', {
+						self.act('role:api, category:delivery, cmd:runTest', {
 							delivery: delivery,
 							task: task
 						});
@@ -106,8 +111,8 @@
 
 	this.add('role:api, category:delivery, cmd:runTest', function(args, done) {
 
-		var params = args.params,
-			id = params.id,
+		var delivery = args.delivery,
+			task = args.task,
 
 			exec = ChildProcess.exec;
 			cmd = "node_modules\\.bin\\intern-client",
