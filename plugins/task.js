@@ -71,7 +71,8 @@
 		var params = args.params,
 			body = args.body,
 			id = params.id,
-			data = body.data;
+			data = body.data,
+			seneca = this;
 
 		Task.findById(id, function(err, task) {
 
@@ -88,6 +89,22 @@
 				task.save(function(err) {
 
 					done(err, [task]);
+
+					seneca.act('role:api, category:delivery, cmd:findAll', {
+						query: { taskid: task._id }
+					}, function(err, reply) {
+
+						var deliveries = reply;
+
+						for (var i = 0; i < deliveries.length; i++) {
+							var delivery = deliveries[i];
+
+							seneca.act('role:api, category:delivery, cmd:runTest', {
+								delivery: delivery,
+								task: task
+							});
+						}
+					});
 				});
 			}
 		});
@@ -96,7 +113,8 @@
 	this.add('role:api, category:task, cmd:delete', function(args, done) {
 
 		var params = args.params,
-			id = params.id;
+			id = params.id,
+			seneca = this;
 
 		Task.findById(id, function(err, task) {
 
@@ -105,6 +123,18 @@
 			} else if (!task) {
 				done(new Error("Not found"));
 			} else {
+				seneca.act('role:api, category:delivery, cmd:findAll', {
+					query: { taskid: id }
+				}, function(err, reply) {
+
+					var deliveries = reply;
+
+					for (var i = 0; i < deliveries.length; i++) {
+						var delivery = deliveries[i];
+						delivery.remove();
+					}
+				});
+
 				task.remove(function(err) {
 
 					done(err);
