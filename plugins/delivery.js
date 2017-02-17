@@ -56,7 +56,7 @@
 			body = args.body,
 			id = params.id,
 			data = body.data,
-			self = this;
+			seneca = this;
 
 		Delivery.findById(id, function(err, delivery) {
 
@@ -72,18 +72,18 @@
 
 				delivery.save(function(err) {
 
-					self.act('role:api, category:task, cmd:findById', {
+					done(err, [delivery]);
+
+					seneca.act('role:api, category:task, cmd:findById', {
 						params: { id: delivery.task }
 					}, function(err, reply) {
 
 						var task = reply[0];
-						self.act('role:api, category:delivery, cmd:runTest', {
+						seneca.act('role:api, category:delivery, cmd:runTest', {
 							delivery: delivery,
 							task: task
 						});
 					});
-
-					done(err, [delivery]);
 				});
 			}
 		});
@@ -134,16 +134,18 @@
 
 			function cbk(err, stdout, stderr) {
 
-				if (!err) {
-					console.log(stdout);
-					var results = JSON.parse(stdout),
-						score = getScore(task, results);
+				var results = JSON.parse(stdout);
 
-					delivery.score = score;
-					delivery.save();
+				if (!results || !results.summary) {
+					done(err, stderr);
 				}
 
-				done(err);
+				var score = getScore(task, results);
+
+				delivery.score = score;
+				delivery.save();
+
+				done(null, results);
 			}
 
 			exec(cmd + " " + execArgs, cbk);
