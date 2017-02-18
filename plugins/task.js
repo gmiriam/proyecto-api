@@ -27,7 +27,9 @@
 			});
 		} else {
 			if (subjectId) {
-				queryObj.subject = subjectId;
+				queryObj = {
+					subject: subjectId
+				};
 			}
 
 			Task.find(queryObj, function(err, tasks) {
