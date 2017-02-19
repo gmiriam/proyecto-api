@@ -92,9 +92,11 @@
 	this.add('role:api, category:delivery, cmd:delete', function(args, done) {
 
 		var params = args.params,
+			taskId = params.taskid,
+			studentId = params.studentid,
 			id = params.id;
 
-		Delivery.findById(id, function(err, delivery) {
+		function removeDeliveryFound(err, delivery) {
 
 			if (err) {
 				done(err);
@@ -106,7 +108,35 @@
 					done(err);
 				});
 			}
-		});
+		}
+
+		function removeDeliveriesFound(err, deliveries) {
+
+			if (!err) {
+				for (var i = 0; i < deliveries.length; i++) {
+					deliveries[i].remove();
+				}
+			}
+
+			done(err);
+		}
+
+		if (taskId && studentId) {
+			Delivery.findOne({
+				task: taskId,
+				student: studentId
+			}, removeDeliveryFound);
+		} else if (studentId) {
+			Delivery.find({
+				student: studentId
+			}, removeDeliveriesFound);
+		} else if (taskId) {
+			Delivery.find({
+				task: taskId
+			}, removeDeliveriesFound);
+		} else {
+			Delivery.findById(id, removeScoreFound);
+		}
 	});
 
 	this.add('role:api, category:delivery, cmd:runTest', function(args, done) {

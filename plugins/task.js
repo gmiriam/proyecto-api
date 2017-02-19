@@ -115,34 +115,53 @@
 	this.add('role:api, category:task, cmd:delete', function(args, done) {
 
 		var params = args.params,
+			subjectId = params.subjectid,
 			id = params.id,
 			seneca = this;
 
-		Task.findById(id, function(err, task) {
+		function removeTaskDeliveries(taskId) {
+
+			seneca.act('role:api, category:delivery, cmd:delete', {
+				params: {
+					taskid: taskId
+				}
+			});
+		}
+
+		function removeTaskFound(err, task) {
 
 			if (err) {
 				done(err);
 			} else if (!task) {
 				done(new Error("Not found"));
 			} else {
-				seneca.act('role:api, category:delivery, cmd:findAll', {
-					query: { taskid: id }
-				}, function(err, reply) {
-
-					var deliveries = reply;
-
-					for (var i = 0; i < deliveries.length; i++) {
-						var delivery = deliveries[i];
-						delivery.remove();
-					}
-				});
-
+				removeTaskDeliveries(task._id);
 				task.remove(function(err) {
 
 					done(err);
 				});
 			}
-		});
+		}
+
+		function removeTasksFound(err, tasks) {
+
+			if (!err) {
+				for (var i = 0; i < tasks.length; i++) {
+					removeTaskDeliveries(task._id);
+					tasks[i].remove();
+				}
+			}
+
+			done(err);
+		}
+
+		if (subjectId) {
+			Task.find({
+				subject: subjectId
+			}, removeTasksFound);
+		} else {
+			Task.findById(id, removeTaskFound);
+		}
 	});
 
 	this.add('role:api, category:task, cmd:assign', function(args, done) {

@@ -1,133 +1,161 @@
-﻿var mongoose = require('mongoose');
-var Score = mongoose.model('score');
+﻿module.exports = function score(options) {
 
-module.exports = function score () {
-  
-this.add('role:api,category:score,cmd:findAll', function(args,done){
-    Score.find(function(err, scores) {
-        if(!err) {
-            done(null,
-              generateResponse("success",scores,null));
-        } else {
-            console.log('ERROR: ' + err);
-            done(err,
-              generateResponse("error", err,null));
-        }
-    });
-})
+	var mongoose = require('mongoose'),
+		Score = mongoose.model('score'),
+		User = mongoose.model('user'),
+		app = options.app;
 
-this.add('role:api,category:score,cmd:findById', function(args,done){
-  Score.findById(args._id, function(err, score) {
-      if(!err) {
-        done(null,
-          generateResponse("success",[score],null));
-      } else {
-        console.log('ERROR: ' + err);
-        done(err,
-          generateResponse("error", err,null));
-      }
-    });
-})
+	this.add('role:api, category:score, cmd:findAll', function(args, done) {
 
-this.add('role:api,category:score,cmd:add', function(args,done){
-  console.log('POST');
+		var query = args.query,
+			subjectId = query.subjectid,
+			studentId = query.studentid,
+			queryObj = {};
 
-  var obj = {
-    student:     args.student,
-	subject:	args.subject,
-	finalScore: args.finalScore
-  };
-  var score = new Score(obj);
-  console.log(score);
+		if (subjectId) {
+			queryObj.subject = subjectId;
+		}
 
-  score.save(function(err) {
-    if(!err) {
-      done(null,
-        generateResponse("success",[score],null));
-      console.log('Created');
-    } else {
-      console.log('ERROR: ' + err);
-      done(err,
-        generateResponse("error", err,null));
-    }
-  });
-})
+		if (studentId) {
+			queryObj.student = studentId;
+		}
 
-this.add('role:api,category:score,cmd:update', function(args,done){
-  Score.findById(args._id, function(err, score) {
-    score.student = args.student;
-	score.subject = args.subject;
-	score.finalScore = args.finalScore;
+		Score.find(queryObj, function(err, scores) {
 
-    score.save(function(err) {
-      if(!err) {
-    done(null,
-      generateResponse("success",[score],null));
-    console.log('Updated');
-      } else {
-    console.log('ERROR: ' + err);
-      done(err,
-        generateResponse("error", err,null));
-      }
-    });
-  });
-})
+			done(err, scores);
+		});
+	});
 
-this.add('role:api,category:score,cmd:delete', function(args,done){
-   console.log(args._id); 
-  Score.findById(args._id, function(err, score) {
-    if (score) {
-      score.remove(function(err) {
-        if(!err) {
-        console.log('Removed');
-        done(null,
-          generateResponse("success",null,null));
-        } else {
-        console.log('ERROR: ' + err);
-        done(err, 
-          generateResponse("error", err,null));
-        }
-      })
-    }
-    else {
-      done(err, 
-        generateResponse("error", err, "No se ha encontrado el elemento que buscaba"));
-    }
-  });
-})
+	this.add('role:api, category:score, cmd:findById', function(args, done) {
 
-this.add('init:score', init)
+		var params = args.params,
+			id = params.id;
 
-function init(msg, respond) {
-  this.act('role:web',{use:{
-    // define some routes that start with /api
-    prefix: '/score',
+		Score.findById(id, function(err, score) {
 
-    // use action patterns where role has the value 'api' and cmd has some defined value
-    pin: {role:'api', category: 'score', cmd:'*'},
+			if (err) {
+				done(err);
+			} else if (!score) {
+				done(new Error("Not found"));
+			} else {
+				done(null, [score]);
+			}
+		});
+	});
 
-    // for each value of cmd, match some HTTP method, and use the
-    // query parameters as values for the action
-    map:{
-      findAll: {GET:true},          // explicitly accepting GETs
-      findById: {GET: true, suffix: '/:_id'},
-      add: {POST: true},
-      update: {PUT: true, suffix: '/:_id'},
-      delete: {DELETE: true, suffix: '/:_id'}
-    }
-  }})
+	this.add('role:api, category:score, cmd:create', function(args, done) {
 
-  respond();
-}
+		var body = args.body,
+			data = body.data,
+			score = new Score(data);
 
-function generateResponse (status, content, message) {
-  return {
-    "status" : status,
-    "content": content,
-    "message": message
-  }
-}
+		score.save(function(err) {
 
-  
-  return 'score'
+			done(err, [score]);
+		});
+	});
+
+	this.add('role:api, category:score, cmd:update', function(args, done) {
+
+		var params = args.params,
+			body = args.body,
+			id = params.id,
+			data = body.data,
+			finalScore = data.finalScore;
+
+		Score.findById(id, function(err, score) {
+
+			if (err) {
+				done(err);
+			} else if (!score) {
+				done(new Error("Not found"));
+			} else {
+				score.finalScore = finalScore;
+				score.save(function(err) {
+
+					done(err, [score]);
+				});
+			}
+		});
+	});
+
+	this.add('role:api, category:score, cmd:delete', function(args, done) {
+
+		var params = args.params,
+			subjectId = params.subjectid,
+			studentId = params.studentid,
+			id = params.id;
+
+		function removeScoreFound(err, score) {
+
+			if (err) {
+				done(err);
+			} else if (!score) {
+				done(new Error("Not found"));
+			} else {
+				score.remove(function(err) {
+
+					done(err);
+				});
+			}
+		}
+
+		function removeScoresFound(err, scores) {
+
+			if (!err) {
+				for (var i = 0; i < scores.length; i++) {
+					scores[i].remove();
+				}
+			}
+
+			done(err);
+		}
+
+		if (subjectId && studentId) {
+			Score.findOne({
+				subject: subjectId,
+				student: studentId
+			}, removeScoreFound);
+		} else if (studentId) {
+			Score.find({
+				student: studentId
+			}, removeScoresFound);
+		} else if (subjectId) {
+			Score.find({
+				subject: subjectId
+			}, removeScoresFound);
+		} else {
+			Score.findById(id, removeScoreFound);
+		}
+	});
+
+	this.add('init:score', function(args, done) {
+
+		function expressCbk(cmd, req, res) {
+
+			this.act('role:api, category:score, cmd:' + cmd, {
+				params: req.params,
+				query: req.query,
+				headers: req.headers,
+				body: req.body
+			}, function(err, reply) {
+
+				this.act('role:api, category:generic, cmd:sendResponse', {
+					error: err,
+					responseData: reply,
+					responseHandler: res
+				});
+			});
+		}
+
+		var prefix = '/score/';
+
+		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'findAll'));
+		app.get(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'findById'));
+		app.put(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'update'));
+
+		done();
+	});
+
+	return 'score';
 }

@@ -62,8 +62,12 @@
 	this.add('role:api, category:user, cmd:create', function(args, done) {
 
 		var body = args.body,
-			data = body.data,
-			user = new User(data);
+			data = body.data;
+
+		delete data.enrolledSubjects;
+		delete data.assignedTasks;
+
+		var user = new User(data);
 
 		user.save(function(err) {
 
@@ -86,8 +90,10 @@
 				done(new Error("Not found"));
 			} else {
 				for (var key in data) {
-					var newUserPropertyValue = data[key];
-					user[key] = newUserPropertyValue;
+					if (key !== "enrolledSubjects" && key !== "assignedTasks") {
+						var newUserPropertyValue = data[key];
+						user[key] = newUserPropertyValue;
+					}
 				}
 
 				user.save(function(err) {
@@ -110,6 +116,25 @@
 			} else if (!user) {
 				done(new Error("Not found"));
 			} else {
+				var enrolledSubjects = user.enrolledSubjects,
+					assignedTasks = user.assignedTasks;
+
+				if (enrolledSubjects && enrolledSubjects.length) {
+					seneca.act('role:api, category:score, cmd:delete', {
+						params: {
+							studentid: user._id
+						}
+					});
+				}
+
+				if (assignedTasks && assignedTasks.length) {
+					seneca.act('role:api, category:delivery, cmd:delete', {
+						params: {
+							studentid: user._id
+						}
+					});
+				}
+
 				user.remove(function(err) {
 
 					done(err);

@@ -7,34 +7,12 @@
 
 	this.add('role:api, category:subject, cmd:findAll', function(args, done) {
 
-		var query = args.query,
-			subjectId = query.subjectid,
-			userId = query.userid,
-			queryObj;
+		var query = args.query;
 
-		if (userId) {
-			User.findById(userId, 'subjects', function(err, user) {
+		Subject.find(function(err, subjects) {
 
-				var subjectIds = user.subjects;
-
-				queryObj = Subject.where('_id').in(subjectIds)
-					.where('subject', subjectId);
-
-				Subject.find(queryObj, function(err, subjects) {
-
-					done(err, subjects);
-				});
-			});
-		} else {
-			if (subjectId) {
-				queryObj.subject = subjectId;
-			}
-
-			Subject.find(queryObj, function(err, subjects) {
-
-				done(err, subjects);
-			});
-		}
+			done(err, subjects);
+		});
 	});
 
 	this.add('role:api, category:subject, cmd:findById', function(args, done) {
@@ -96,7 +74,8 @@
 	this.add('role:api, category:subject, cmd:delete', function(args, done) {
 
 		var params = args.params,
-			id = params.id;
+			id = params.id,
+			seneca = this;
 
 		Subject.findById(id, function(err, subject) {
 
@@ -105,6 +84,12 @@
 			} else if (!subject) {
 				done(new Error("Not found"));
 			} else {
+				seneca.act('role:api, category:task, cmd:delete', {
+					params: {
+						subjectid: subject._id
+					}
+				});
+
 				subject.remove(function(err) {
 
 					done(err);
@@ -118,7 +103,8 @@
 		var body = args.body,
 			data = body.data,
 			subjectId = data.subject,
-			studentIds = data.students;
+			studentIds = data.students,
+			seneca = this;
 
 		User.find({
 			_id: {
@@ -132,6 +118,15 @@
 
 			if (student.enrolledSubjects.indexOf(subjectId) === -1) {
 				student.enrolledSubjects.push(subjectId);
+
+				seneca.act('role:api, category:score, cmd:create', {
+					body: {
+						data: {
+							subject: subjectId,
+							student: student._id
+						}
+					}
+				});
 			}
 
 			student.save();
@@ -145,7 +140,8 @@
 		var body = args.body,
 			data = body.data,
 			subjectId = data.subject,
-			studentIds = data.students;
+			studentIds = data.students,
+			seneca = this;
 
 		User.find({
 			_id: {
@@ -160,6 +156,13 @@
 			var index = student.enrolledSubjects.indexOf(subjectId);
 			if (index !== -1) {
 				student.enrolledSubjects.splice(index, 1);
+
+				seneca.act('role:api, category:score, cmd:delete', {
+					params: {
+						subjectid: subjectId,
+						studentid: student._id
+					}
+				});
 			}
 
 			student.save();
