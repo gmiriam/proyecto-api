@@ -9,6 +9,7 @@
 		var query = args.query,
 			role = query.role,
 			enrolledSubjectId = query.enrolledsubjectid,
+			assignedTaskId = query.assignedtaskid,
 			queryObj;
 
 		if (role) {
@@ -29,6 +30,10 @@
 
 		if (enrolledSubjectId) {
 			queryObj = { 'enrolledSubjects': enrolledSubjectId };
+		}
+
+		if (assignedTaskId) {
+			queryObj = { 'assignedTasks': assignedTaskId };
 		}
 
 		User.find(queryObj, function(err, users) {

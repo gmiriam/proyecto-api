@@ -113,6 +113,61 @@
 		});
 	});
 
+	this.add('role:api, category:subject, cmd:enrollStudents', function(args, done) {
+
+		var body = args.body,
+			data = body.data,
+			subjectId = data.subject,
+			studentIds = data.students;
+
+		User.find({
+			_id: {
+				$in: studentIds
+			}
+		}).cursor().on('data', function(student) {
+
+			if (!Array.isArray(student.enrolledSubjects)) {
+				student.enrolledSubjects = [];
+			}
+
+			if (student.enrolledSubjects.indexOf(subjectId) === -1) {
+				student.enrolledSubjects.push(subjectId);
+			}
+
+			student.save();
+		});
+
+		done(null);
+	});
+
+	this.add('role:api, category:subject, cmd:unenrollStudents', function(args, done) {
+
+		var body = args.body,
+			data = body.data,
+			subjectId = data.subject,
+			studentIds = data.students;
+
+		User.find({
+			_id: {
+				$in: studentIds
+			}
+		}).cursor().on('data', function(student) {
+
+			if (!Array.isArray(student.enrolledSubjects)) {
+				return;
+			}
+
+			var index = student.enrolledSubjects.indexOf(subjectId);
+			if (index !== -1) {
+				student.enrolledSubjects.splice(index, 1);
+			}
+
+			student.save();
+		});
+
+		done(null);
+	});
+
 	this.add('init:subject', function(args, done) {
 
 		function expressCbk(cmd, req, res) {
@@ -139,6 +194,8 @@
 		app.post(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'create'));
 		app.put(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'update'));
 		app.delete(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'delete'));
+		app.post(prefix + 'enrollstudents', /*app.oauth.authorise(), */expressCbk.bind(this, 'enrollStudents'));
+		app.post(prefix + 'unenrollstudents', /*app.oauth.authorise(), */expressCbk.bind(this, 'unenrollStudents'));
 
 		done();
 	});
