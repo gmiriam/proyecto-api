@@ -16,37 +16,6 @@ app.use(cors());
 
 //*******************************************************
 
-app.get('/login', function (req,res){
-	var postOptions = {
-		host: 'localhost',
-		port: port,
-		path: '/oauth/token',
-		method: 'POST',
-		headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-				'Authorization': 'Basic YXBwbGljYXRpb246c2VjcmV0'
-		}
-
-	};
-
-	var userName = req.query.usr,
-		password = req.query.pwd;
-
-	var usrDecoded = new Buffer(userName.toString(), 'base64').toString('ascii'),
-		pwdDecoded = new Buffer(password.toString(), 'base64').toString('ascii');
-
-	var postReq = http.request(postOptions, function(postRes) {
-		postRes.setEncoding('utf8');
-		postRes.on('data', function (chunk) {
-			console.log("dentro del post", chunk);
-			var accessToken = JSON.parse(chunk).access_token;
-			res.send(chunk);
-		});
-	});
-	postReq.write('grant_type=password&username=' + usrDecoded + '&password=' + pwdDecoded);
-	postReq.end();
-});
-
 function checkUserMiddleware(req, res, next) {
 
 	var authorization = req.get("Authorization"),

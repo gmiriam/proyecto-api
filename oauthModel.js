@@ -9,6 +9,40 @@ var clientModel = mongoose.model('client'),
 	userModel = mongoose.model('user');
 
 /**
+ * Add example client and user to the database (for debug).
+ */
+
+var loadExampleData = function() {
+
+	var client = new clientModel({
+		clientId: 'proyecto-client',
+		clientSecret: 'thisisasecretpassword'
+	});
+
+	client.save(function(err, client) {
+
+		if (err) {
+			return console.error(err);
+		}
+		console.log('Created client', client);
+	});
+
+	var user = new userModel({
+		email: 'admin',
+		password: 'admin',
+		role: 'admin'
+	});
+
+	user.save(function(err, user) {
+
+		if (err) {
+			return console.error(err);
+		}
+		console.log('Created user', user);
+	});
+};
+
+/**
  * Dump the database content (for debug).
  */
 
