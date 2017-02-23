@@ -84,9 +84,23 @@
 			} else if (!subject) {
 				done(new Error("Not found"));
 			} else {
+				var subjectId = subject._id;
+
 				seneca.act('role:api, category:task, cmd:delete', {
 					params: {
-						subjectid: subject._id
+						subjectid: subjectId
+					}
+				});
+
+				seneca.act('role:api, category:score, cmd:delete', {
+					params: {
+						subjectid: subjectId
+					}
+				});
+
+				seneca.act('role:api, category:subject, cmd:unenrollAllStudents', {
+					params: {
+						subjectid: subjectId
 					}
 				});
 
@@ -112,7 +126,7 @@
 			}
 		}).cursor().on('data', function(student) {
 
-			if (!Array.isArray(student.enrolledSubjects)) {
+			if (!student || !Array.isArray(student.enrolledSubjects)) {
 				student.enrolledSubjects = [];
 			}
 
@@ -149,7 +163,7 @@
 			}
 		}).cursor().on('data', function(student) {
 
-			if (!Array.isArray(student.enrolledSubjects)) {
+			if (!student || !Array.isArray(student.enrolledSubjects)) {
 				return;
 			}
 
@@ -157,13 +171,32 @@
 			if (index !== -1) {
 				student.enrolledSubjects.splice(index, 1);
 
-				seneca.act('role:api, category:score, cmd:delete', {
+				seneca.act('role:api, category:task, cmd:unassignAllFromStudentBySubject', {
 					params: {
 						subjectid: subjectId,
 						studentid: student._id
 					}
 				});
 			}
+
+			student.save();
+		});
+
+		done(null);
+	});
+
+	this.add('role:api, category:subject, cmd:unenrollAllStudents', function(args, done) {
+
+		var params = args.params,
+			subjectId = params.subjectid
+			seneca = this;
+
+		User.find({
+			enrolledSubjects: subjectId
+		}).cursor().on('data', function(student) {
+
+			var index = student.enrolledSubjects.indexOf(subjectId);
+			student.enrolledSubjects.splice(index, 1);
 
 			student.save();
 		});

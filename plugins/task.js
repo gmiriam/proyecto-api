@@ -135,7 +135,16 @@
 			} else if (!task) {
 				done(new Error("Not found"));
 			} else {
-				removeTaskDeliveries(task._id);
+				var taskId = task._id;
+
+				seneca.act('role:api, category:task, cmd:unassignFromStudents', {
+					params: {
+						taskid: taskId
+					}
+				});
+
+				removeTaskDeliveries(taskId);
+
 				task.remove(function(err) {
 
 					done(err);
@@ -147,7 +156,16 @@
 
 			if (!err) {
 				for (var i = 0; i < tasks.length; i++) {
-					removeTaskDeliveries(task._id);
+					var taskId = task._id;
+
+					seneca.act('role:api, category:task, cmd:unassignFromStudents', {
+						params: {
+							taskid: taskId
+						}
+					});
+
+					removeTaskDeliveries(taskId);
+
 					tasks[i].remove();
 				}
 			}
@@ -177,7 +195,7 @@
 			}
 		}).cursor().on('data', function(student) {
 
-			if (!Array.isArray(student.assignedTasks)) {
+			if (!student || !Array.isArray(student.assignedTasks)) {
 				student.assignedTasks = [];
 			}
 
@@ -204,7 +222,7 @@
 			}
 		}).cursor().on('data', function(student) {
 
-			if (!Array.isArray(student.assignedTasks)) {
+			if (!student || !Array.isArray(student.assignedTasks)) {
 				return;
 			}
 
@@ -214,6 +232,79 @@
 			}
 
 			student.save();
+		});
+
+		done(null);
+	});
+
+	this.add('role:api, category:task, cmd:unassignAllFromStudentBySubject', function(args, done) {
+
+		var params = args.params,
+			subjectId = params.subjectid,
+			studentId = params.studentid;
+
+		this.act('role:api, category:task, cmd:findAll', {
+			query: {
+				subjectid: subjectId
+			}
+		}, function(err, reply) {
+
+			var tasks = reply;
+
+			if (!tasks || !tasks.length) {
+				return;
+			}
+
+			User.findById(studentId, function(err, student) {
+
+				if (!student || !Array.isArray(student.assignedTasks)) {
+					return;
+				}
+
+				for (var i = 0; i < tasks.length; i++) {
+					var task = tasks[i],
+						taskId = task._id,
+						index = student.assignedTasks.indexOf(taskId);
+
+					if (index !== -1) {
+						student.assignedTasks.splice(index, 1);
+					}
+				}
+
+				student.save();
+			});
+		});
+
+		done(null);
+	});
+
+	this.add('role:api, category:task, cmd:unassignFromStudents', function(args, done) {
+
+		var params = args.params,
+			taskId = params.taskid;
+
+		this.act('role:api, category:user, cmd:findAll', {
+			query: {
+				assignedtaskid: taskId
+			}
+		}, function(err, reply) {
+
+			var students = reply;
+
+			if (!students || !students.length) {
+				return;
+			}
+
+			for (var i = 0; i < students.length; i++) {
+				var student = students[i],
+					index = student.assignedTasks.indexOf(taskId);
+
+				if (index !== -1) {
+					student.assignedTasks.splice(index, 1);
+				}
+
+				student.save();
+			}
 		});
 
 		done(null);
@@ -240,7 +331,7 @@
 
 		var prefix = '/task/';
 
-		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'findAll'));
+		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'findAll'));
 		app.get(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'findById'));
 		app.post(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'create'));
 		app.put(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'update'));

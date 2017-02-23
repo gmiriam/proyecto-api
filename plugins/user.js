@@ -107,7 +107,8 @@
 	this.add('role:api, category:user, cmd:delete', function(args, done) {
 
 		var params = args.params,
-			id = params.id;
+			id = params.id,
+			seneca = this;
 
 		User.findById(id, function(err, user) {
 
@@ -116,13 +117,14 @@
 			} else if (!user) {
 				done(new Error("Not found"));
 			} else {
-				var enrolledSubjects = user.enrolledSubjects,
+				var userId = user._id,
+					enrolledSubjects = user.enrolledSubjects,
 					assignedTasks = user.assignedTasks;
 
 				if (enrolledSubjects && enrolledSubjects.length) {
 					seneca.act('role:api, category:score, cmd:delete', {
 						params: {
-							studentid: user._id
+							studentid: userId
 						}
 					});
 				}
@@ -130,7 +132,7 @@
 				if (assignedTasks && assignedTasks.length) {
 					seneca.act('role:api, category:delivery, cmd:delete', {
 						params: {
-							studentid: user._id
+							studentid: userId
 						}
 					});
 				}

@@ -1,4 +1,4 @@
-﻿module.exports = function delivery(options) {
+module.exports = function delivery(options) {
 
 	var mongoose = require('mongoose'),
 		ChildProcess = require('child_process'),
