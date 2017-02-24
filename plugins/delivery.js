@@ -135,7 +135,7 @@ module.exports = function delivery(options) {
 				task: taskId
 			}, removeDeliveriesFound);
 		} else {
-			Delivery.findById(id, removeScoreFound);
+			Delivery.findById(id, removeDeliveryFound);
 		}
 	});
 

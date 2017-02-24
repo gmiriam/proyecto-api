@@ -156,7 +156,8 @@
 
 			if (!err) {
 				for (var i = 0; i < tasks.length; i++) {
-					var taskId = task._id;
+					var task = tasks[i],
+						taskId = task._id;
 
 					seneca.act('role:api, category:task, cmd:unassignFromStudents', {
 						params: {
@@ -166,7 +167,7 @@
 
 					removeTaskDeliveries(taskId);
 
-					tasks[i].remove();
+					task.remove();
 				}
 			}
 
