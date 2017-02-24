@@ -46,12 +46,23 @@
 	this.add('role:api, category:score, cmd:create', function(args, done) {
 
 		var body = args.body,
-			data = body.data,
-			score = new Score(data);
+			data = body.data;
 
-		score.save(function(err) {
+		Score.findOne({
+			subject: data.subject,
+			student: data.student
+		}, function(err, score) {
 
-			done(err, [score]);
+			if (err || score) {
+				done(err);
+			} else {
+				var newScore = new Score(data);
+
+				newScore.save(function(err) {
+
+					done(err, [newScore]);
+				});
+			}
 		});
 	});
 

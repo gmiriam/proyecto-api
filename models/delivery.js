@@ -2,10 +2,12 @@ var mongoose = require('mongoose'),
 	Schema = mongoose.Schema,
 	schemaInstance = Schema({
 		task: {
-			type: String
+			type: String,
+			required: true
 		},
 		student: {
-			type: String
+			type: String,
+			required: true
 		},
 		score: {
 			type: Number,
@@ -13,7 +15,11 @@ var mongoose = require('mongoose'),
 			max: 100
 		},
 		data: {
-			type: String
+			type: String,
+			required: true
+		},
+		results: {
+			type: Object
 		}
 	});
 

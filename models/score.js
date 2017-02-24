@@ -2,10 +2,12 @@ var mongoose = require('mongoose'),
 	Schema = mongoose.Schema,
 	schemaInstance = Schema({
 		student: {
-			type: String
+			type: String,
+			required: true
 		},
 		subject: {
-			type: String
+			type: String,
+			required: true
 		},
 		finalScore: {
 			type: Number,

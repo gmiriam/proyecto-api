@@ -83,6 +83,16 @@
 			} else if (!task) {
 				done(new Error("Not found"));
 			} else {
+				var evaluateResults,
+					runTest;
+
+				if (task.maxScore !== data.maxScore && task.evaluationTest === data.evaluationTest) {
+					evaluateResults = true;
+				}
+				if (task.evaluationTest !== data.evaluationTest) {
+					runTest = true;
+				}
+
 				for (var key in data) {
 					var newTaskPropertyValue = data[key];
 					task[key] = newTaskPropertyValue;
@@ -92,7 +102,7 @@
 
 					done(err, [task]);
 
-					seneca.act('role:api, category:delivery, cmd:findAll', {
+					runTest && seneca.act('role:api, category:delivery, cmd:findAll', {
 						query: { taskid: task._id }
 					}, function(err, reply) {
 
@@ -107,6 +117,10 @@
 							});
 						}
 					});
+				});
+
+				evaluateResults && seneca.act('role:api, category:delivery, cmd:evaluateResults', {
+					task: task
 				});
 			}
 		});

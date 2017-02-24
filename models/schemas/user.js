@@ -1,23 +1,32 @@
 ﻿module.exports = {
 	firstName: {
-		type: String
+		type: String,
+		trim: true,
+		required: true
 	},
 	surname: {
-		type: String
+		type: String,
+		trim: true
 	},
 	email: {
-		type: String
+		type: String,
+		unique: true,
+		trim: true,
+		required: true
 	},
 	password: {
-		type: String
+		type: String,
+		required: true
 	},
 	role: {
-		type: String
+		type: String,
+		enum: ['admin', 'teacher', 'student'],
+		required: true
 	},
 	enrolledSubjects: {
-		type: [String],
+		type: [String]
 	},
 	assignedTasks: {
-		type: [String],
+		type: [String]
 	}
 };

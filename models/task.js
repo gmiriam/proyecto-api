@@ -2,10 +2,13 @@ var mongoose = require('mongoose'),
 	Schema = mongoose.Schema,
 	schemaInstance = Schema({
 		name: {
-			type: String
+			type: String,
+			trim: true,
+			required: true
 		},
 		statement: {
-			type: String
+			type: String,
+			trim: true
 		},
 		startDate: {
 			type: Date
@@ -16,14 +19,15 @@ var mongoose = require('mongoose'),
 		},
 		maxScore: {
 			type: Number,
-			min: 0,
-			max: 100
+			required: true,
+			min: 1
 		},
 		teacher: {
 			type: String
 		},
 		subject: {
-			type: String
+			type: String,
+			required: true
 		},
 		evaluationTest: {
 			type: String
@@ -35,7 +39,11 @@ var mongoose = require('mongoose'),
 
 function endDateValidator(endDate) {
 
-	return endDate > this.startDate;
+	if (!endDate || !this.startDate) {
+		return true;
+	}
+
+	return endDate >= this.startDate;
 }
 
 module.exports = mongoose.model('task', schemaInstance);

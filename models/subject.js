@@ -2,10 +2,14 @@ var mongoose = require('mongoose'),
 	Schema = mongoose.Schema,
 	schemaInstance = Schema({
 		name: {
-			type: String
+			type: String,
+			unique: true,
+			trim: true,
+			required: true
 		},
 		description: {
-			type: String
+			type: String,
+			trim: true
 		},
 		temary: {
 			type: String
