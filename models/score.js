@@ -16,4 +16,9 @@ var mongoose = require('mongoose'),
 		}
 	});
 
+schemaInstance.index({
+	subject: 1,
+	student: 1
+}, { unique: true });
+
 module.exports = mongoose.model('score', schemaInstance);

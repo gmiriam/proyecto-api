@@ -37,6 +37,11 @@ var mongoose = require('mongoose'),
 		}
 	});
 
+schemaInstance.index({
+	subject: 1,
+	name: 1
+}, { unique: true });
+
 function endDateValidator(endDate) {
 
 	if (!endDate || !this.startDate) {
