@@ -170,6 +170,7 @@ module.exports = function delivery(options) {
 		var params = args.params,
 			taskId = params.taskid,
 			studentId = params.studentid,
+			subjectId = params.subjectid,
 			id = params.id;
 
 		function removeDeliveryFound(err, delivery) {
@@ -202,6 +203,21 @@ module.exports = function delivery(options) {
 				task: taskId,
 				student: studentId
 			}, removeDeliveryFound);
+		} else if (subjectId && studentId) {
+			this.act('role:api, category:task, cmd:findAll', {
+				query: { subjectid: subjectId }
+			}, (function(studentId, err, reply) {
+
+				var tasks = reply;
+				for (var i = 0; i < tasks.length; i++) {
+					var task = tasks[i];
+
+					Delivery.find({
+						task: task._id,
+						student: studentId
+					}, removeDeliveriesFound);
+				}
+			}).bind(this, studentId));
 		} else if (studentId) {
 			Delivery.find({
 				student: studentId

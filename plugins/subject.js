@@ -171,10 +171,26 @@
 			if (index !== -1) {
 				student.enrolledSubjects.splice(index, 1);
 
+				var studentId = student._id;
+
 				seneca.act('role:api, category:task, cmd:unassignAllFromStudentBySubject', {
 					params: {
 						subjectid: subjectId,
-						studentid: student._id
+						studentid: studentId
+					}
+				});
+
+				seneca.act('role:api, category:delivery, cmd:delete', {
+					params: {
+						subjectid: subjectId,
+						studentid: studentId
+					}
+				});
+
+				seneca.act('role:api, category:score, cmd:delete', {
+					params: {
+						subjectid: subjectId,
+						studentid: studentId
 					}
 				});
 			}
