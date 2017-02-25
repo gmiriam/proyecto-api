@@ -204,24 +204,43 @@
 			taskId = data.task,
 			studentIds = data.students;
 
-		User.find({
-			_id: {
-				$in: studentIds
+		this.act('role:api, category:task, cmd:findById', {
+			params: {
+				id: taskId
 			}
-		}).cursor().on('data', function(student) {
+		}, (function(studentIds, err, reply) {
 
-			if (!student || !Array.isArray(student.assignedTasks)) {
-				student.assignedTasks = [];
-			}
+			User.find({
+				_id: {
+					$in: studentIds
+				}
+			}).cursor().on('data', (function(task, student) {
 
-			if (student.assignedTasks.indexOf(taskId) === -1) {
-				student.assignedTasks.push(taskId);
-			}
+				if (!student) {
+					return;
+				}
 
-			student.save();
-		});
+				var taskId = task._id,
+					studentId = student._id;
 
-		done(null);
+				if (!Array.isArray(student.assignedTasks)) {
+					student.assignedTasks = [];
+				}
+
+				if (student.assignedTasks.indexOf(taskId) === -1) {
+					student.assignedTasks.push(taskId);
+				}
+
+				student.save();
+
+				this.act('role:api, category:score, cmd:calculateAndUpdateScore', {
+					subjectid: task.subject,
+					studentid: studentId
+				});
+			}).bind(this, reply[0]));
+
+			done(null);
+		}).bind(this, studentIds));
 	});
 
 	this.add('role:api, category:task, cmd:unassign', function(args, done) {
@@ -231,25 +250,85 @@
 			taskId = data.task,
 			studentIds = data.students;
 
-		User.find({
-			_id: {
-				$in: studentIds
+		this.act('role:api, category:task, cmd:findById', {
+			params: {
+				id: taskId
 			}
-		}).cursor().on('data', function(student) {
+		}, (function(studentIds, err, reply) {
 
-			if (!student || !Array.isArray(student.assignedTasks)) {
-				return;
+			User.find({
+				_id: {
+					$in: studentIds
+				}
+			}).cursor().on('data', (function(task, student) {
+
+				if (!student || !Array.isArray(student.assignedTasks)) {
+					return;
+				}
+
+				var taskId = task._id,
+					studentId = student._id,
+					index = student.assignedTasks.indexOf(taskId);
+
+				if (index !== -1) {
+					student.assignedTasks.splice(index, 1);
+				}
+
+				student.save();
+
+				this.act('role:api, category:score, cmd:calculateAndUpdateScore', {
+					subjectid: task.subject,
+					studentid: studentId
+				});
+			}).bind(this, reply[0]));
+
+			done(null);
+		}).bind(this, studentIds));
+	});
+
+	this.add('role:api, category:task, cmd:unassignFromStudents', function(args, done) {
+
+		var params = args.params,
+			taskId = params.taskid;
+
+		this.act('role:api, category:task, cmd:findById', {
+			params: {
+				id: taskId
 			}
+		}, (function(err, reply) {
 
-			var index = student.assignedTasks.indexOf(taskId);
-			if (index !== -1) {
-				student.assignedTasks.splice(index, 1);
-			}
+			this.act('role:api, category:user, cmd:findAll', {
+				query: {
+					assignedtaskid: taskId
+				}
+			}, (function(task, err, reply) {
 
-			student.save();
-		});
+				var students = reply,
+					taskId = task._id;
 
-		done(null);
+				if (!students || !students.length) {
+					return;
+				}
+
+				for (var i = 0; i < students.length; i++) {
+					var student = students[i],
+						index = student.assignedTasks.indexOf(taskId);
+
+					if (index !== -1) {
+						student.assignedTasks.splice(index, 1);
+					}
+
+					student.save();
+
+					this.act('role:api, category:score, cmd:calculateAndUpdateScore', {
+						subjectid: task.subject,
+						studentid: student._id
+					});
+				}
+			}).bind(this, reply[0]));
+
+			done(null);
+		}).bind(this));
 	});
 
 	this.add('role:api, category:task, cmd:unassignAllFromStudentBySubject', function(args, done) {
@@ -288,38 +367,6 @@
 
 				student.save();
 			});
-		});
-
-		done(null);
-	});
-
-	this.add('role:api, category:task, cmd:unassignFromStudents', function(args, done) {
-
-		var params = args.params,
-			taskId = params.taskid;
-
-		this.act('role:api, category:user, cmd:findAll', {
-			query: {
-				assignedtaskid: taskId
-			}
-		}, function(err, reply) {
-
-			var students = reply;
-
-			if (!students || !students.length) {
-				return;
-			}
-
-			for (var i = 0; i < students.length; i++) {
-				var student = students[i],
-					index = student.assignedTasks.indexOf(taskId);
-
-				if (index !== -1) {
-					student.assignedTasks.splice(index, 1);
-				}
-
-				student.save();
-			}
 		});
 
 		done(null);

@@ -140,6 +140,108 @@
 		}
 	});
 
+	this.add('role:api, category:score, cmd:calculateAndUpdateScore', function(args, done) {
+
+		var params = args.params,
+			subjectId = params.subjectid,
+			studentId = params.studentid;
+
+		if (!subjectId || !studentId) {
+			done(null);
+			return;
+		}
+
+		this.act('role:api, category:score, cmd:findAll', {
+			query: {
+				subjectid: subjectId,
+				studentid: studentId
+			}
+		}, (function(subjectId, studentId, err, reply) {
+
+			var score = reply[0];
+
+			this.act('role:api, category:task, cmd:findAll', {
+				query: {
+					subjectid: subjectId,
+					userid: studentId
+				}
+			}, (function(score, err, reply) {
+
+				var tasks = reply,
+					promises = [];
+
+				for (var i = 0; i < tasks.length; i++) {
+					var task = tasks[i],
+						taskId = task._id,
+						maxScore = task.maxScore,
+
+						promiseHandler = {},
+						promise = new Promise((function(resolve, reject) {
+							this.resolve = resolve;
+							this.reject = reject;
+						}).bind(promiseHandler));
+
+					promises.push(promise);
+
+					this.act('role:api, category:delivery, cmd:findAll', {
+						taskid: taskId
+					}, (function(maxScore, promiseHandler, err, reply) {
+
+						var delivery = reply[0];
+
+						if (!delivery) {
+							promiseHandler.resolve(null);
+							return;
+						}
+
+						promiseHandler.resolve({
+							maxScore: maxScore,
+							score: delivery.score
+						});
+					}).bind(maxScore, promiseHandler, this));
+				}
+
+				Promise.all(promises).then((function(score, results) {
+
+					this.act('role:api, category:score, cmd:calculateScore', {
+						scoreData: results
+					}, (function(score, err, reply) {
+
+						var finalScore = reply.finalScore;
+
+						score.finalScore = finalScore;
+						score.save(function(err) {
+
+							done(err, [score]);
+						});
+					}).bind(this, score));
+				}).bind(this, score));
+			}).bind(this, score));
+		}).bind(this, subjectId, studentId));
+	});
+
+	this.add('role:api, category:score, cmd:calculateScore', function(args, done) {
+
+		var scoreData = args.scoreData,
+			n = scoreData.length,
+			maxFinalScore = 100,
+			finalScore = 0;
+
+		for (var i = 0; i < n; i++) {
+
+			var scoreItem = scoreData[i];
+			if (scoreItem) {
+				finalScore += (scoreItem.score * maxFinalScore) / scoreItem.maxScore;
+			}
+		}
+
+		finalScore = finalScore / n;
+
+		done(null, {
+			finalScore: finalScore
+		});
+	});
+
 	this.add('init:score', function(args, done) {
 
 		function expressCbk(cmd, req, res) {

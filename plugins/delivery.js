@@ -89,10 +89,9 @@ module.exports = function delivery(options) {
 			body = args.body,
 			id = params.id,
 			data = body.data,
-			score = data.score,
-			seneca = this;
+			score = data.score;
 
-		Delivery.findById(id, function(err, delivery) {
+		Delivery.findById(id, (function(score, err, delivery) {
 
 			if (err) {
 				done(err);
@@ -105,8 +104,21 @@ module.exports = function delivery(options) {
 
 					done(err, [delivery]);
 				});
+
+				this.act('role:api, category:task, cmd:findById', {
+					params: { id: delivery.task }
+				}, (function(studentId, err, reply) {
+
+					var task = reply[0],
+						subjectId = task.subject;
+
+					this.act('role:api, category:score, cmd:calculateAndUpdateScore', {
+						subjectid: subjectId,
+						studentid: studentId
+					});
+				}).bind(this, delivery.student));
 			}
-		});
+		}).bind(this, score));
 	});
 
 	this.add('role:api, category:delivery, cmd:saveAndRunTest', function(args, done) {
@@ -133,36 +145,61 @@ module.exports = function delivery(options) {
 
 	this.add('role:api, category:delivery, cmd:evaluateResults', function(args, done) {
 
-		var task = args.task,
-			delivery = args.delivery,
-			seneca = this;
+		var task = args.task;
 
-		if (!delivery) {
-			this.act('role:api, category:delivery, cmd:findAll', {
-				query: { taskid: task._id }
-			}, function(err, reply) {
-
-				var deliveries = reply;
-				for (var i = 0; i < deliveries.length; i++) {
-					var delivery = deliveries[i];
-
-					seneca.act('role:api, category:delivery, cmd:getScore', {
-						task: task,
-						results: delivery.results
-					}, (function(delivery, err, reply) {
-
-						var score = reply.score;
-
-						delivery.score = score;
-						delivery.save();
-					}).bind(this, delivery));
-				}
-
-				done(err);
-			});
-		} else {
+		if (!task) {
 			done(null);
+			return;
 		}
+
+		this.act('role:api, category:delivery, cmd:findAll', {
+			query: { taskid: task._id }
+		}, (function(task, err, reply) {
+
+			var deliveries = reply,
+				promises = [];
+
+			for (var i = 0; i < deliveries.length; i++) {
+				var delivery = deliveries[i],
+					promiseHandler = {},
+					promise = new Promise((function(resolve, reject) {
+						this.resolve = resolve;
+						this.reject = reject;
+					}).bind(promiseHandler));
+
+				promises.push(promise);
+
+				this.act('role:api, category:delivery, cmd:getScore', {
+					task: task,
+					results: delivery.results
+				}, (function(delivery, promiseHandler, err, reply) {
+
+					var score = reply.score;
+
+					delivery.score = score;
+					delivery.save();
+
+					promiseHandler.resolve(delivery);
+				}).bind(this, delivery, promiseHandler));
+			}
+
+			done(err);
+
+			Promise.all(promises).then((function(task, deliveriesUpdated) {
+
+				var subjectId = task.subject;
+
+				for (var i = 0; i < deliveriesUpdated.length; i++) {
+					var deliveryUpdated = deliveriesUpdated[i];
+
+					this.act('role:api, category:score, cmd:calculateAndUpdateScore', {
+						subjectid: subjectId,
+						studentid: deliveryUpdated.student
+					});
+				}
+			}).bind(this, task));
+
+		}).bind(this, task));
 	});
 
 	this.add('role:api, category:delivery, cmd:delete', function(args, done) {
@@ -227,7 +264,29 @@ module.exports = function delivery(options) {
 				task: taskId
 			}, removeDeliveriesFound);
 		} else {
-			Delivery.findById(id, removeDeliveryFound);
+			Delivery.findById(id, (function(err, delivery) {
+
+				var taskId = delivery.task,
+					studentId = delivery.student;
+
+				removeDeliveryFound(err, delivery);
+
+				this.act('role:api, category:task, cmd:findById', {
+					params: {
+						id: taskId
+					}
+				}, (function(studentId, err, reply) {
+
+					var task = reply[0],
+						subjectId = task.subject;
+
+					this.act('role:api, category:score, cmd:calculateAndUpdateScore', {
+						subjectid: subjectId,
+						studentid: studentId
+					});
+				}).bind(this, studentId));
+
+			}).bind(this));
 		}
 	});
 
@@ -246,7 +305,7 @@ module.exports = function delivery(options) {
 			code = pathToCode + delivery.data.split(".")[0],
 			execArgs = "config=tests/intern suites=" + suites + " pathToCode=" + code;
 
-			function cbk(delivery, err, stdout, stderr) {
+			function cbk(task, delivery, err, stdout, stderr) {
 
 				var results = JSON.parse(stdout);
 
@@ -259,7 +318,7 @@ module.exports = function delivery(options) {
 				seneca.act('role:api, category:delivery, cmd:getScore', {
 					task: task,
 					results: results
-				}, (function(delivery, err, reply) {
+				}, (function(task, delivery, err, reply) {
 
 					var score = reply.score;
 
@@ -267,10 +326,15 @@ module.exports = function delivery(options) {
 					delivery.save();
 
 					done(null);
-				}).bind(this, delivery));
+
+					this.act('role:api, category:score, cmd:calculateAndUpdateScore', {
+						subjectid: task.subject,
+						studentid: delivery.student
+					});
+				}).bind(this, task, delivery));
 			}
 
-			exec(cmd + " " + execArgs, cbk.bind(this, delivery));
+			exec(cmd + " " + execArgs, cbk.bind(this, task, delivery));
 	});
 
 	this.add('role:api, category:delivery, cmd:getScore', function(args, done) {
