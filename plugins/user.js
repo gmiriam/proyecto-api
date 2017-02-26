@@ -2,12 +2,14 @@
 
 	var mongoose = require('mongoose'),
 		User = mongoose.model('user'),
+		Token = mongoose.model('token'),
 		app = options.app;
 
 	this.add('role:api, category:user, cmd:findAll', function(args, done) {
 
 		var query = args.query,
 			role = query.role,
+			email = query.email,
 			enrolledSubjectId = query.enrolledsubjectid,
 			assignedTaskId = query.assignedtaskid,
 			queryObj;
@@ -26,6 +28,10 @@
 			} else {
 				queryObj = { 'role': role };
 			}
+		}
+
+		if (email) {
+			queryObj = { 'email': email };
 		}
 
 		if (enrolledSubjectId) {
@@ -143,6 +149,42 @@
 				});
 			}
 		});
+	});
+
+	this.add('role:api, category:user, cmd:checkUserHasOwnToken', function(args, done) {
+
+		var userToken = args.userToken,
+			userId = args.userId;
+
+		if (!userToken) {
+			done(null, { hasOwnToken: false });
+			return;
+		}
+
+		Token.findOne({
+			accessToken: userToken
+		}, (function(userId, err, token) {
+
+			if (err) {
+				done(err);
+			} else if (!token) {
+				done(new Error("Not found"));
+			} else {
+				var user = token.user;
+
+				this.act('role:api, category:user, cmd:findAll', {
+					query: {
+						email: user.email
+					}
+				}, (function(userId, args, reply) {
+
+					var user = reply[0],
+						hasOwnToken = userId === user._id.toString();
+
+					done(null, { hasOwnToken: hasOwnToken });
+				}).bind(this, userId));
+			}
+		}).bind(this, userId));
 	});
 
 	this.add('init:user', function(args, done) {

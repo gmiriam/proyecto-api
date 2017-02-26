@@ -1,21 +1,40 @@
 var express = require('express'),
-	seneca = require('seneca')(),
+	seneca = require('seneca'),
 	bodyParser	= require("body-parser"),
 	methodOverride = require("method-override"),
 	http = require('http'),
-	cors = require('cors');
+	cors = require('cors'),
 
-var port = 3002,
-	app = express();
+	port = 3002,
+	app = express(),
+	senecaInstance = seneca();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride());
 app.use(cors());
 
+app.listen(port, function() {
+
+	console.log("Node server running on http://localhost:" + port);
+});
+
+senecaInstance
+	.use("plugins/generic")
+	.use("plugins/mongodb")
+	.ready(function(err) {
+		this
+			.use("plugins/oauth", { app:app })
+			.use("plugins/download", { app:app })
+			.use("plugins/upload", { app:app })
+			.use("plugins/user", { app:app })
+			.use("plugins/delivery", { app:app })
+			.use("plugins/score", { app:app })
+			.use("plugins/subject", { app:app })
+			.use("plugins/task", { app:app });
+	});
 
 //*******************************************************
-
 function checkUserMiddleware(req, res, next) {
 
 	var authorization = req.get("Authorization"),
@@ -34,24 +53,3 @@ function checkUserMiddleware(req, res, next) {
 		}
 	})
 }
-//*******************************************************
-
-seneca
-	.use("plugins/generic")
-	.use("plugins/mongodb")
-	.ready(function(err) {
-		this
-			.use("plugins/oauth", { app:app })
-			.use("plugins/download", { app:app })
-			.use("plugins/upload", { app:app })
-			.use("plugins/user", { app:app })
-			.use("plugins/delivery", { app:app })
-			.use("plugins/score", { app:app })
-			.use("plugins/subject", { app:app })
-			.use("plugins/task", { app:app });
-	});
-
-app.listen(port, function() {
-
-	console.log("Node server running on http://localhost:" + port);
-});

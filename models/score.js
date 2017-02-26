@@ -12,7 +12,7 @@ var mongoose = require('mongoose'),
 		finalScore: {
 			type: Number,
 			min: 0,
-			max: 100
+			max: 10
 		}
 	});
 

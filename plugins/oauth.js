@@ -7,7 +7,8 @@
 
 		app.oauth = oauthServer({
 			model: require('../oauthModel.js'),
-			grants: ['password']
+			grants: ['password'],
+			accessTokenLifetime: 10800
 		});
 
 		app.use(app.oauth.errorHandler());

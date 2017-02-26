@@ -227,7 +227,7 @@
 
 		var scoreData = args.scoreData,
 			n = scoreData.length,
-			maxFinalScore = 100,
+			maxFinalScore = 10,
 			finalScore = 0;
 
 		for (var i = 0; i < n; i++) {
