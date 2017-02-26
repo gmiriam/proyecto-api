@@ -397,13 +397,13 @@
 
 		var prefix = '/task/';
 
-		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'findAll'));
-		app.get(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'findById'));
-		app.post(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'create'));
-		app.put(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'update'));
-		app.delete(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'delete'));
-		app.post(prefix + 'assign', /*app.oauth.authorise(), */expressCbk.bind(this, 'assign'));
-		app.post(prefix + 'unassign', /*app.oauth.authorise(), */expressCbk.bind(this, 'unassign'));
+		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'findAll'));
+		app.get(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'findById'));
+		app.post(prefix, app.oauth.authorise(), expressCbk.bind(this, 'create'));
+		app.put(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'update'));
+		app.delete(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'delete'));
+		app.post(prefix + 'assign', app.oauth.authorise(), expressCbk.bind(this, 'assign'));
+		app.post(prefix + 'unassign', app.oauth.authorise(), expressCbk.bind(this, 'unassign'));
 
 		done();
 	});

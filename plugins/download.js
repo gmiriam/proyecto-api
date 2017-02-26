@@ -31,7 +31,7 @@
 
 		var prefix = '/download';
 
-		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'getFile'));
+		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'getFile'));
 
 		done();
 	});

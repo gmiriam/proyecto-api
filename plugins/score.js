@@ -266,9 +266,9 @@
 
 		var prefix = '/score/';
 
-		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'findAll'));
-		app.get(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'findById'));
-		app.put(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'update'));
+		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'findAll'));
+		app.get(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'findById'));
+		app.put(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'update'));
 
 		done();
 	});

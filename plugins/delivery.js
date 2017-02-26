@@ -374,12 +374,12 @@ module.exports = function delivery(options) {
 
 		var prefix = '/delivery/';
 
-		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'findAll'));
-		app.get(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'findById'));
-		app.post(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'create'));
-		app.put(prefix + ':id/updatescore', /*app.oauth.authorise(), */expressCbk.bind(this, 'updateScore'));
-		app.put(prefix + ':id/updatedata', /*app.oauth.authorise(), */expressCbk.bind(this, 'updateData'));
-		app.delete(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'delete'));
+		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'findAll'));
+		app.get(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'findById'));
+		app.post(prefix, app.oauth.authorise(), expressCbk.bind(this, 'create'));
+		app.put(prefix + ':id/updatescore', app.oauth.authorise(), expressCbk.bind(this, 'updateScore'));
+		app.put(prefix + ':id/updatedata', app.oauth.authorise(), expressCbk.bind(this, 'updateData'));
+		app.delete(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'delete'));
 
 		done();
 	});

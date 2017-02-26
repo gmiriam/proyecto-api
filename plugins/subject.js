@@ -241,13 +241,13 @@
 
 		var prefix = '/subject/';
 
-		app.get(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'findAll'));
-		app.get(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'findById'));
-		app.post(prefix, /*app.oauth.authorise(), */expressCbk.bind(this, 'create'));
-		app.put(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'update'));
-		app.delete(prefix + ':id', /*app.oauth.authorise(), */expressCbk.bind(this, 'delete'));
-		app.post(prefix + 'enrollstudents', /*app.oauth.authorise(), */expressCbk.bind(this, 'enrollStudents'));
-		app.post(prefix + 'unenrollstudents', /*app.oauth.authorise(), */expressCbk.bind(this, 'unenrollStudents'));
+		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'findAll'));
+		app.get(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'findById'));
+		app.post(prefix, app.oauth.authorise(), expressCbk.bind(this, 'create'));
+		app.put(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'update'));
+		app.delete(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'delete'));
+		app.post(prefix + 'enrollstudents', app.oauth.authorise(), expressCbk.bind(this, 'enrollStudents'));
+		app.post(prefix + 'unenrollstudents', app.oauth.authorise(), expressCbk.bind(this, 'unenrollStudents'));
 
 		done();
 	});
