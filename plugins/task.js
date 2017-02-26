@@ -13,12 +13,16 @@
 			queryObj;
 
 		if (userId) {
-			User.findById(userId, 'tasks', function(err, user) {
+			User.findById(userId, 'assignedTasks', function(err, user) {
 
-				var taskIds = user.tasks;
+				var taskIds = user.assignedTasks;
 
-				queryObj = Task.where('_id').in(taskIds)
-					.where('subject', subjectId);
+				queryObj = {
+					_id: {
+						$in: taskIds
+					},
+					subject: subjectId
+				};
 
 				Task.find(queryObj, function(err, tasks) {
 

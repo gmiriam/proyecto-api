@@ -142,9 +142,8 @@
 
 	this.add('role:api, category:score, cmd:calculateAndUpdateScore', function(args, done) {
 
-		var params = args.params,
-			subjectId = params.subjectid,
-			studentId = params.studentid;
+		var subjectId = args.subjectid,
+			studentId = args.studentid;
 
 		if (!subjectId || !studentId) {
 			done(null);
@@ -165,7 +164,7 @@
 					subjectid: subjectId,
 					userid: studentId
 				}
-			}, (function(score, err, reply) {
+			}, (function(studentId, score, err, reply) {
 
 				var tasks = reply,
 					promises = [];
@@ -177,6 +176,7 @@
 
 						promiseHandler = {},
 						promise = new Promise((function(resolve, reject) {
+
 							this.resolve = resolve;
 							this.reject = reject;
 						}).bind(promiseHandler));
@@ -184,7 +184,10 @@
 					promises.push(promise);
 
 					this.act('role:api, category:delivery, cmd:findAll', {
-						taskid: taskId
+						query: {
+							taskid: taskId,
+							studentid: studentId
+						}
 					}, (function(maxScore, promiseHandler, err, reply) {
 
 						var delivery = reply[0];
@@ -198,7 +201,7 @@
 							maxScore: maxScore,
 							score: delivery.score
 						});
-					}).bind(maxScore, promiseHandler, this));
+					}).bind(this, maxScore, promiseHandler));
 				}
 
 				Promise.all(promises).then((function(score, results) {
@@ -216,7 +219,7 @@
 						});
 					}).bind(this, score));
 				}).bind(this, score));
-			}).bind(this, score));
+			}).bind(this, studentId, score));
 		}).bind(this, subjectId, studentId));
 	});
 

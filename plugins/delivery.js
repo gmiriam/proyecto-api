@@ -9,10 +9,15 @@ module.exports = function delivery(options) {
 
 		var query = args.query,
 			taskId = query.taskid,
-			queryObj;
+			studentId = query.studentid,
+			queryObj = {};
 
 		if (taskId) {
-			queryObj = { task: taskId };
+			queryObj.task = taskId;
+		}
+
+		if (studentId) {
+			queryObj.student = studentId;
 		}
 
 		Delivery.find(queryObj, function(err, deliveries) {
