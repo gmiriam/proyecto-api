@@ -23,33 +23,40 @@ senecaInstance
 	.use("plugins/generic")
 	.use("plugins/mongodb")
 	.ready(function(err) {
+
+		var commons = require('./commons');
+
 		this
-			.use("plugins/oauth", { app:app })
-			.use("plugins/download", { app:app })
-			.use("plugins/upload", { app:app })
-			.use("plugins/user", { app:app })
-			.use("plugins/delivery", { app:app })
-			.use("plugins/score", { app:app })
-			.use("plugins/subject", { app:app })
-			.use("plugins/task", { app:app });
+			.use("plugins/oauth", {
+				app: app,
+				commons: commons
+			})
+			.use("plugins/download", {
+				app: app,
+				commons: commons
+			})
+			.use("plugins/upload", {
+				app: app,
+				commons: commons
+			})
+			.use("plugins/user", {
+				app: app,
+				commons: commons
+			})
+			.use("plugins/delivery", {
+				app: app,
+				commons: commons
+			})
+			.use("plugins/score", {
+				app: app,
+				commons: commons
+			})
+			.use("plugins/subject", {
+				app: app,
+				commons: commons
+			})
+			.use("plugins/task", {
+				app: app,
+				commons: commons
+			});
 	});
-
-//*******************************************************
-function checkUserMiddleware(req, res, next) {
-
-	var authorization = req.get("Authorization"),
-		token = authorization.split(" ").pop(),
-		tokenModel = require("./mongo/model/token");
-	console.log("me vino", token);
-	tokenModel.findOne({
-		accessToken: token
-	}, function(err, tokenFound) {
-		var user = tokenFound.user.username;
-		console.log("el token era de ", user);
-		if (user === "pedroetb") {
-			res.end("eres pedroetb, no te dejo pasar");
-		} else {
-			next();
-		}
-	})
-}

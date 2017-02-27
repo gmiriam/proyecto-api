@@ -3,7 +3,8 @@
 	var mongoose = require('mongoose'),
 		Subject = mongoose.model('subject'),
 		User = mongoose.model('user'),
-		app = options.app;
+		app = options.app,
+		commons = options.commons;
 
 	this.add('role:api, category:subject, cmd:findAll', function(args, done) {
 
@@ -241,53 +242,33 @@
 
 		var prefix = '/subject/';
 
-		var checkUserHasOwnToken = (function(req, res, next) {
-
-			var headers = req.headers,
-				userToken = headers.authorization.split(' ').pop(),
-				userId = headers.userid;
-
-			this.act('role:api, category:user, cmd:checkUserHasOwnToken', {
-				userToken: userToken,
-				userId: userId
-			}, (function(next, err, reply) {
-
-				var hasOwnToken = reply.hasOwnToken;
-				if (hasOwnToken) {
-					next();
-				} else {
-					res.status(500).send('Your token is not original!');
-				}
-			}).bind(this, next));
-		}).bind(this);
-
-		var checkUserIsAdmin = (function(req, res, next) {
-
-			var headers = req.headers,
-				userId = headers.userid;
-
-			this.act('role:api, category:user, cmd:findById', {
-				params: {
-					id: userId
-				}
-			}, (function(next, err, reply) {
-
-				var user = reply[0];
-				if (user.role === "admin") {
-					next();
-				} else {
-					res.status(500).send('You are not admin!');
-				}
-			}).bind(this, next));
-		}).bind(this);
-
-		app.get(prefix, app.oauth.authorise(), /*checkUserHasOwnToken, checkUserIsAdmin, */expressCbk.bind(this, 'findAll'));
+		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'findAll'));
 		app.get(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'findById'));
-		app.post(prefix, app.oauth.authorise(), expressCbk.bind(this, 'create'));
-		app.put(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'update'));
-		app.delete(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'delete'));
-		app.post(prefix + 'enrollstudents', app.oauth.authorise(), expressCbk.bind(this, 'enrollStudents'));
-		app.post(prefix + 'unenrollstudents', app.oauth.authorise(), expressCbk.bind(this, 'unenrollStudents'));
+
+		app.post(prefix, app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdmin.bind(this),
+			expressCbk.bind(this, 'create'));
+
+		app.put(prefix + ':id', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
+			expressCbk.bind(this, 'update'));
+
+		app.delete(prefix + ':id', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdmin.bind(this),
+			expressCbk.bind(this, 'delete'));
+
+		app.post(prefix + 'enrollstudents', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
+			expressCbk.bind(this, 'enrollStudents'));
+
+		app.post(prefix + 'unenrollstudents', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
+			expressCbk.bind(this, 'unenrollStudents'));
 
 		done();
 	});
