@@ -3,7 +3,8 @@
 	var mongoose = require('mongoose'),
 		Score = mongoose.model('score'),
 		User = mongoose.model('user'),
-		app = options.app;
+		app = options.app,
+		commons = options.commons;
 
 	this.add('role:api, category:score, cmd:findAll', function(args, done) {
 
@@ -247,28 +248,21 @@
 
 	this.add('init:score', function(args, done) {
 
-		function expressCbk(cmd, req, res) {
-
-			this.act('role:api, category:score, cmd:' + cmd, {
-				params: req.params,
-				query: req.query,
-				headers: req.headers,
-				body: req.body
-			}, function(err, reply) {
-
-				this.act('role:api, category:generic, cmd:sendResponse', {
-					error: err,
-					responseData: reply,
-					responseHandler: res
-				});
-			});
-		}
-
 		var prefix = '/score/';
 
-		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'findAll'));
-		app.get(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'findById'));
-		app.put(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'update'));
+		app.get(prefix, app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrRequestHasUserQueryFilter.bind(this),
+			commons.expressCbk.bind(this, 'score', 'findAll'));
+
+		app.get(prefix + ':id', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.expressCbk.bind(this, 'score', 'findById'));
+
+		app.put(prefix + ':id', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
+			commons.expressCbk.bind(this, 'score', 'update'));
 
 		done();
 	});

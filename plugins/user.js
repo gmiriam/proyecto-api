@@ -3,7 +3,8 @@
 	var mongoose = require('mongoose'),
 		User = mongoose.model('user'),
 		Token = mongoose.model('token'),
-		app = options.app;
+		app = options.app,
+		commons = options.commons;
 
 	this.add('role:api, category:user, cmd:findAll', function(args, done) {
 
@@ -189,30 +190,29 @@
 
 	this.add('init:user', function(args, done) {
 
-		function expressCbk(cmd, req, res) {
-
-			this.act('role:api, category:user, cmd:' + cmd, {
-				params: req.params,
-				query: req.query,
-				headers: req.headers,
-				body: req.body
-			}, function(err, reply) {
-
-				this.act('role:api, category:generic, cmd:sendResponse', {
-					error: err,
-					responseData: reply,
-					responseHandler: res
-				});
-			});
-		}
-
 		var prefix = '/user/';
 
-		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'findAll'));
-		app.get(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'findById'));
-		app.post(prefix, app.oauth.authorise(), expressCbk.bind(this, 'create'));
-		app.put(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'update'));
-		app.delete(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'delete'));
+		app.get(prefix, app.oauth.authorise(),
+			commons.expressCbk.bind(this, 'user', 'findAll'));
+
+		app.get(prefix + ':id', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.expressCbk.bind(this, 'user', 'findById'));
+
+		app.post(prefix, app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdmin.bind(this),
+			commons.expressCbk.bind(this, 'user', 'create'));
+
+		app.put(prefix + ':id', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdmin.bind(this),
+			commons.expressCbk.bind(this, 'user', 'update'));
+
+		app.delete(prefix + ':id', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdmin.bind(this),
+			commons.expressCbk.bind(this, 'user', 'delete'));
 
 		done();
 	});

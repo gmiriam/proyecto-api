@@ -1,3 +1,20 @@
+var expressCbk = function(category, cmd, req, res) {
+
+	this.act('role:api, category:' + category + ', cmd:' + cmd, {
+		params: req.params,
+		query: req.query,
+		headers: req.headers,
+		body: req.body
+	}, function(err, reply) {
+
+		this.act('role:api, category:generic, cmd:sendResponse', {
+			error: err,
+			responseData: reply,
+			responseHandler: res
+		});
+	});
+};
+
 var checkUserHasOwnToken = function(req, res, next) {
 
 	var headers = req.headers,
@@ -48,57 +65,6 @@ var checkUserIsAdmin = function(req, res, next) {
 	}).bind(this, next));
 };
 
-var checkUserIsTeacher = function(req, res, next) {
-
-	var headers = req.headers,
-		userId = headers.userid;
-
-	if (!userId) {
-		res.status(500).send('Missing data');
-		return;
-	}
-
-	this.act('role:api, category:user, cmd:findById', {
-		params: {
-			id: userId
-		}
-	}, (function(next, err, reply) {
-
-		var user = reply[0];
-		if (user.role === "teacher") {
-			next();
-		} else {
-			res.status(500).send('You are not teacher');
-		}
-	}).bind(this, next));
-};
-
-var checkUserIsTeacherInSubject = function(req, res, next) {
-
-	var headers = req.headers,
-		userId = headers.userid,
-		subjectId = headers.subjectid;
-
-	if (!userId || !subjectId) {
-		res.status(500).send('Missing data');
-		return;
-	}
-
-	this.act('role:api, category:subject, cmd:findById', {
-		params: {
-			id: subjectId
-		}
-	}, (function(userId, next, err, reply) {
-
-		var subject = reply[0];
-		if (subject.teachers && subject.teachers.indexOf(userId) !== -1) {
-			next();
-		} else {
-			res.status(500).send('You are not teacher in this subject');
-		}
-	}).bind(this, userId, next));
-};
-
 var checkUserIsAdminOrTeacherInSubject = function(req, res, next) {
 
 	var headers = req.headers,
@@ -137,10 +103,9 @@ var checkUserIsAdminOrTeacherInSubject = function(req, res, next) {
 			res.status(500).send('You are not admin or teacher');
 		}
 	}).bind(this, userId, subjectId, next));
-
 };
 
-var checkUserIsEnrolledInSubject = function(req, res, next) {
+var checkUserIsAdminOrStudentInSubject = function(req, res, next) {
 
 	var headers = req.headers,
 		userId = headers.userid,
@@ -158,15 +123,15 @@ var checkUserIsEnrolledInSubject = function(req, res, next) {
 	}, (function(subjectId, next, err, reply) {
 
 		var user = reply[0];
-		if (user.enrolledSubjects && user.enrolledSubjects.indexOf(subjectId) !== -1) {
+		if (user.role === "admin" || (user.enrolledSubjects && user.enrolledSubjects.indexOf(subjectId) !== -1)) {
 			next();
 		} else {
-			res.status(500).send('You are not student in this subject');
+			res.status(500).send('You are not admin or student in this subject');
 		}
 	}).bind(this, subjectId, next));
 };
 
-var checkUserHasAssignedTask = function(req, res, next) {
+var checkUserIsAdminOrStudentWithTask = function(req, res, next) {
 
 	var headers = req.headers,
 		userId = headers.userid,
@@ -184,20 +149,47 @@ var checkUserHasAssignedTask = function(req, res, next) {
 	}, (function(taskId, next, err, reply) {
 
 		var user = reply[0];
-		if (user.assignedTasks && user.assignedTasks.indexOf(taskId) !== -1) {
+		if (user.role === "admin" || (user.assignedTasks && user.assignedTasks.indexOf(taskId) !== -1)) {
 			next();
 		} else {
-			res.status(500).send('You do not have this task assigned');
+			res.status(500).send('You are not admin or student with this task assigned');
 		}
 	}).bind(this, taskId, next));
 };
 
+var checkUserIsAdminOrRequestHasUserQueryFilter = function(req, res, next) {
+
+	var headers = req.headers,
+		query = req.query,
+		userId = headers.userid,
+		userQuery = query.userid || query.studentid;
+
+	if (!userId) {
+		res.status(500).send('Missing data');
+		return;
+	}
+
+	this.act('role:api, category:user, cmd:findById', {
+		params: {
+			id: userId
+		}
+	}, (function(userId, userQuery, next, err, reply) {
+
+		var user = reply[0];
+		if (user.role === 'admin' || (!!userQuery && userId === userQuery)) {
+			next();
+		} else {
+			res.status(500).send('You are trying to get contents forbidden for you');
+		}
+	}).bind(this, userId, userQuery, next));
+};
+
 module.exports = {
+	expressCbk: expressCbk,
 	checkUserHasOwnToken: checkUserHasOwnToken,
 	checkUserIsAdmin: checkUserIsAdmin,
-	checkUserIsTeacher: checkUserIsTeacher,
-	checkUserIsTeacherInSubject: checkUserIsTeacherInSubject,
 	checkUserIsAdminOrTeacherInSubject: checkUserIsAdminOrTeacherInSubject,
-	checkUserIsEnrolledInSubject: checkUserIsEnrolledInSubject,
-	checkUserHasAssignedTask: checkUserHasAssignedTask
+	checkUserIsAdminOrStudentInSubject: checkUserIsAdminOrStudentInSubject,
+	checkUserIsAdminOrStudentWithTask: checkUserIsAdminOrStudentWithTask,
+	checkUserIsAdminOrRequestHasUserQueryFilter: checkUserIsAdminOrRequestHasUserQueryFilter
 };

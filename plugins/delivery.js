@@ -3,7 +3,8 @@ module.exports = function delivery(options) {
 	var mongoose = require('mongoose'),
 		ChildProcess = require('child_process'),
 		Delivery = mongoose.model('delivery'),
-		app = options.app;
+		app = options.app,
+		commons = options.commons;
 
 	this.add('role:api, category:delivery, cmd:findAll', function(args, done) {
 
@@ -355,31 +356,39 @@ module.exports = function delivery(options) {
 
 	this.add('init:delivery', function(args, done) {
 
-		function expressCbk(cmd, req, res) {
-
-			this.act('role:api, category:delivery, cmd:' + cmd, {
-				params: req.params,
-				query: req.query,
-				headers: req.headers,
-				body: req.body
-			}, function(err, reply) {
-
-				this.act('role:api, category:generic, cmd:sendResponse', {
-					error: err,
-					responseData: reply,
-					responseHandler: res
-				});
-			});
-		}
-
 		var prefix = '/delivery/';
 
-		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'findAll'));
-		app.get(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'findById'));
-		app.post(prefix, app.oauth.authorise(), expressCbk.bind(this, 'create'));
-		app.put(prefix + ':id/updatescore', app.oauth.authorise(), expressCbk.bind(this, 'updateScore'));
-		app.put(prefix + ':id/updatedata', app.oauth.authorise(), expressCbk.bind(this, 'updateData'));
-		app.delete(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'delete'));
+		app.get(prefix, app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrRequestHasUserQueryFilter.bind(this),
+			commons.expressCbk.bind(this, 'delivery', 'findAll'));
+
+		app.get(prefix + ':id', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.expressCbk.bind(this, 'delivery', 'findById'));
+
+		app.post(prefix, app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrStudentInSubject.bind(this),
+			commons.checkUserIsAdminOrStudentWithTask.bind(this),
+			commons.expressCbk.bind(this, 'delivery', 'create'));
+
+		app.put(prefix + ':id/updatescore', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
+			commons.expressCbk.bind(this, 'delivery', 'updateScore'));
+
+		app.put(prefix + ':id/updatedata', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrStudentInSubject.bind(this),
+			commons.checkUserIsAdminOrStudentWithTask.bind(this),
+			commons.expressCbk.bind(this, 'delivery', 'updateData'));
+
+		app.delete(prefix + ':id', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrStudentInSubject.bind(this),
+			commons.checkUserIsAdminOrStudentWithTask.bind(this),
+			commons.expressCbk.bind(this, 'delivery', 'delete'));
 
 		done();
 	});

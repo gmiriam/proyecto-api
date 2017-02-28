@@ -8,9 +8,24 @@
 
 	this.add('role:api, category:subject, cmd:findAll', function(args, done) {
 
-		var query = args.query;
+		var query = args.query,
+			userId = query.userid,
+			queryObj = {};
 
-		Subject.find(function(err, subjects) {
+		if (userId) {
+			User.findById(userId, 'enrolledSubjects', function(err, user) {
+
+				var subjectIds = user.enrolledSubjects;
+
+				queryObj = {
+					_id: {
+						$in: subjectIds
+					}
+				};
+			});
+		}
+
+		Subject.find(queryObj, function(err, subjects) {
 
 			done(err, subjects);
 		});
@@ -223,52 +238,41 @@
 
 	this.add('init:subject', function(args, done) {
 
-		function expressCbk(cmd, req, res) {
-
-			this.act('role:api, category:subject, cmd:' + cmd, {
-				params: req.params,
-				query: req.query,
-				headers: req.headers,
-				body: req.body
-			}, function(err, reply) {
-
-				this.act('role:api, category:generic, cmd:sendResponse', {
-					error: err,
-					responseData: reply,
-					responseHandler: res
-				});
-			});
-		}
-
 		var prefix = '/subject/';
 
-		app.get(prefix, app.oauth.authorise(), expressCbk.bind(this, 'findAll'));
-		app.get(prefix + ':id', app.oauth.authorise(), expressCbk.bind(this, 'findById'));
+		app.get(prefix, app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.checkUserIsAdminOrRequestHasUserQueryFilter.bind(this),
+			commons.expressCbk.bind(this, 'subject', 'findAll'));
+
+		app.get(prefix + ':id', app.oauth.authorise(),
+			commons.checkUserHasOwnToken.bind(this),
+			commons.expressCbk.bind(this, 'subject', 'findById'));
 
 		app.post(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			expressCbk.bind(this, 'create'));
+			commons.expressCbk.bind(this, 'subject', 'create'));
 
 		app.put(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			expressCbk.bind(this, 'update'));
+			commons.expressCbk.bind(this, 'subject', 'update'));
 
 		app.delete(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			expressCbk.bind(this, 'delete'));
+			commons.expressCbk.bind(this, 'subject', 'delete'));
 
 		app.post(prefix + 'enrollstudents', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			expressCbk.bind(this, 'enrollStudents'));
+			commons.expressCbk.bind(this, 'subject', 'enrollStudents'));
 
 		app.post(prefix + 'unenrollstudents', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			expressCbk.bind(this, 'unenrollStudents'));
+			commons.expressCbk.bind(this, 'subject', 'unenrollStudents'));
 
 		done();
 	});

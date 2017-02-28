@@ -24,39 +24,19 @@ senecaInstance
 	.use("plugins/mongodb")
 	.ready(function(err) {
 
-		var commons = require('./commons');
+		var commons = require('./commons'),
+			props = {
+				app: app,
+				commons: commons
+			};
 
 		this
-			.use("plugins/oauth", {
-				app: app,
-				commons: commons
-			})
-			.use("plugins/download", {
-				app: app,
-				commons: commons
-			})
-			.use("plugins/upload", {
-				app: app,
-				commons: commons
-			})
-			.use("plugins/user", {
-				app: app,
-				commons: commons
-			})
-			.use("plugins/delivery", {
-				app: app,
-				commons: commons
-			})
-			.use("plugins/score", {
-				app: app,
-				commons: commons
-			})
-			.use("plugins/subject", {
-				app: app,
-				commons: commons
-			})
-			.use("plugins/task", {
-				app: app,
-				commons: commons
-			});
+			.use("plugins/oauth", props)
+			.use("plugins/download", props)
+			.use("plugins/upload", props)
+			.use("plugins/user", props)
+			.use("plugins/delivery", props)
+			.use("plugins/score", props)
+			.use("plugins/subject", props)
+			.use("plugins/task", props);
 	});
