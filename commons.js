@@ -184,6 +184,48 @@ var checkUserIsAdminOrRequestHasUserQueryFilter = function(req, res, next) {
 	}).bind(this, userId, userQuery, next));
 };
 
+var checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject = function(req, res, next) {
+
+	var headers = req.headers,
+		query = req.query,
+		userId = headers.userid,
+		subjectId = headers.subjectid,
+		userQuery = query.userid || query.studentid;
+
+	if (!userId) {
+		res.status(500).send('Missing data');
+		return;
+	}
+
+	this.act('role:api, category:user, cmd:findById', {
+		params: {
+			id: userId
+		}
+	}, (function(userId, subjectId, userQuery, next, err, reply) {
+
+		var user = reply[0];
+		if (user.role === 'admin' || (!!userQuery && userId === userQuery)) {
+			next();
+		} else if (user.role === "teacher") {
+			this.act('role:api, category:subject, cmd:findById', {
+				params: {
+					id: subjectId
+				}
+			}, (function(userId, next, err, reply) {
+
+				var subject = reply[0];
+				if (subject.teachers && subject.teachers.indexOf(userId) !== -1) {
+					next();
+				} else {
+					res.status(500).send('You are not teacher in this subject');
+				}
+			}).bind(this, userId, next));
+		} else {
+			res.status(500).send('You are trying to get contents forbidden for you');
+		}
+	}).bind(this, userId, subjectId, userQuery, next));
+};
+
 module.exports = {
 	expressCbk: expressCbk,
 	checkUserHasOwnToken: checkUserHasOwnToken,
@@ -191,5 +233,6 @@ module.exports = {
 	checkUserIsAdminOrTeacherInSubject: checkUserIsAdminOrTeacherInSubject,
 	checkUserIsAdminOrStudentInSubject: checkUserIsAdminOrStudentInSubject,
 	checkUserIsAdminOrStudentWithTask: checkUserIsAdminOrStudentWithTask,
-	checkUserIsAdminOrRequestHasUserQueryFilter: checkUserIsAdminOrRequestHasUserQueryFilter
+	checkUserIsAdminOrRequestHasUserQueryFilter: checkUserIsAdminOrRequestHasUserQueryFilter,
+	checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject: checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject
 };

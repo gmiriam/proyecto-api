@@ -383,7 +383,7 @@
 
 		app.get(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
-			commons.checkUserIsAdminOrRequestHasUserQueryFilter.bind(this),
+			commons.checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject.bind(this),
 			commons.expressCbk.bind(this, 'task', 'findAll'));
 
 		app.get(prefix + ':id', app.oauth.authorise(),
