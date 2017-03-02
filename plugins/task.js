@@ -135,19 +135,9 @@
 
 		var params = args.params,
 			subjectId = params.subjectid,
-			id = params.id,
-			seneca = this;
+			id = params.id;
 
-		function removeTaskDeliveries(taskId) {
-
-			seneca.act('role:api, category:delivery, cmd:delete', {
-				params: {
-					taskid: taskId
-				}
-			});
-		}
-
-		function removeTaskFound(err, task) {
+		function removeTaskFound(onTaskRemoved, done, err, task) {
 
 			if (err) {
 				done(err);
@@ -156,37 +146,51 @@
 			} else {
 				var taskId = task._id;
 
-				seneca.act('role:api, category:task, cmd:unassignFromStudents', {
+				this.act('role:api, category:task, cmd:unassignFromStudents', {
 					params: {
-						taskid: taskId
+						taskid: task._id
 					}
-				});
+				}, (function(task, onTaskRemoved, done, err, reply) {
 
-				removeTaskDeliveries(taskId);
+					if (err) {
+						done(err);
+						return;
+					}
 
-				task.remove(function(err) {
+					this.act('role:api, category:delivery, cmd:delete', {
+						params: {
+							taskid: task._id
+						}
+					}, (function(task, onTaskRemoved, done, err, reply) {
 
-					done(err);
-				});
+						if (err) {
+							done(err);
+							return;
+						}
+
+						if (onTaskRemoved) {
+							task.remove(onTaskRemoved.bind(this, done));
+						} else {
+							task.remove();
+						}
+					}).bind(this, task, onTaskRemoved, done));
+				}).bind(this, task, onTaskRemoved, done));
 			}
 		}
 
-		function removeTasksFound(err, tasks) {
+		function onTaskRemoved(done, err) {
+
+			done(err);
+		}
+
+		function removeTasksFound(done, err, tasks) {
 
 			if (!err) {
 				for (var i = 0; i < tasks.length; i++) {
 					var task = tasks[i],
 						taskId = task._id;
 
-					seneca.act('role:api, category:task, cmd:unassignFromStudents', {
-						params: {
-							taskid: taskId
-						}
-					});
-
-					removeTaskDeliveries(taskId);
-
-					task.remove();
+					removeTaskFound(null, done, null, task);
 				}
 			}
 
@@ -196,9 +200,9 @@
 		if (subjectId) {
 			Task.find({
 				subject: subjectId
-			}, removeTasksFound);
+			}, removeTasksFound.bind(this, done));
 		} else {
-			Task.findById(id, removeTaskFound);
+			Task.findById(id, removeTaskFound.bind(this, onTaskRemoved, done));
 		}
 	});
 
