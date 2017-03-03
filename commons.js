@@ -162,7 +162,7 @@ var checkUserIsAdminOrRequestHasUserQueryFilter = function(req, res, next) {
 	var headers = req.headers,
 		query = req.query,
 		userId = headers.userid,
-		userQuery = query.userid || query.studentid;
+		userQuery = query.userid || query.teacherid || query.studentid;
 
 	if (!userId) {
 		res.status(500).send('Missing data');
@@ -173,15 +173,17 @@ var checkUserIsAdminOrRequestHasUserQueryFilter = function(req, res, next) {
 		params: {
 			id: userId
 		}
-	}, (function(userId, userQuery, next, err, reply) {
+	}, (function(userQuery, next, err, reply) {
 
-		var user = reply[0];
+		var user = reply[0],
+			userId = user._id.toString();
+
 		if (user.role === 'admin' || (!!userQuery && userId === userQuery)) {
 			next();
 		} else {
 			res.status(500).send('You are trying to get contents forbidden for you');
 		}
-	}).bind(this, userId, userQuery, next));
+	}).bind(this, userQuery, next));
 };
 
 var checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject = function(req, res, next) {
@@ -190,7 +192,7 @@ var checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject = function(req
 		query = req.query,
 		userId = headers.userid,
 		subjectId = headers.subjectid,
-		userQuery = query.userid || query.studentid;
+		userQuery = query.userid || query.teacherid || query.studentid;
 
 	if (!userId) {
 		res.status(500).send('Missing data');
@@ -201,9 +203,11 @@ var checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject = function(req
 		params: {
 			id: userId
 		}
-	}, (function(userId, subjectId, userQuery, next, err, reply) {
+	}, (function(subjectId, userQuery, next, err, reply) {
 
-		var user = reply[0];
+		var user = reply[0],
+			userId = user._id.toString();
+
 		if (user.role === 'admin' || (!!userQuery && userId === userQuery)) {
 			next();
 		} else if (user.role === "teacher") {
@@ -223,7 +227,7 @@ var checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject = function(req
 		} else {
 			res.status(500).send('You are trying to get contents forbidden for you');
 		}
-	}).bind(this, userId, subjectId, userQuery, next));
+	}).bind(this, subjectId, userQuery, next));
 };
 
 module.exports = {

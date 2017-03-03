@@ -8,27 +8,59 @@
 
 	this.add('role:api, category:subject, cmd:findAll', function(args, done) {
 
-		var query = args.query,
-			userId = query.userid,
-			queryObj = {};
+		var headers = args.headers,
+			query = args.query,
+			userId = headers.userid,
+			teacherId = query.teacherid,
+			studentId = query.studentid;
 
-		if (userId) {
-			User.findById(userId, 'enrolledSubjects', function(err, user) {
+		if (teacherId) {
+			if (teacherId !== userId) {
+				done(new Error("User query value does not match with your user"));
+				return;
+			}
 
-				var subjectIds = user.enrolledSubjects;
+			var queryObj = {
+				teachers: teacherId
+			};
 
-				queryObj = {
-					_id: {
-						$in: subjectIds
-					}
-				};
+			Subject.find(queryObj, (function(done, err, subjects) {
+
+				done(err, subjects);
+			}).bind(this, done));
+
+		} else if (studentId) {
+			if (studentId !== userId) {
+				done(new Error("User query value does not match with your user"));
+				return;
+			}
+
+			this.act('role:api, category:user, cmd:findById', {
+				params: {
+					id: studentId
+				}
+			}, (function(done, err, reply) {
+
+				var user = reply[0],
+					subjectIds = user.enrolledSubjects;
+					queryObj = {
+						_id: {
+							$in: subjectIds
+						}
+					};
+
+				Subject.find(queryObj, (function(done, err, subjects) {
+
+					done(err, subjects);
+				}).bind(this, done));
+			}).bind(this, done));
+
+		} else {
+			Subject.find(function(err, subjects) {
+
+				done(err, subjects);
 			});
 		}
-
-		Subject.find(queryObj, function(err, subjects) {
-
-			done(err, subjects);
-		});
 	});
 
 	this.add('role:api, category:subject, cmd:findById', function(args, done) {
