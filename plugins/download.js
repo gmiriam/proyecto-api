@@ -16,8 +16,21 @@
 
 		var prefix = '/download';
 
-		app.get(prefix, app.oauth.authorise(),
-			commons.expressCbk.bind(this, 'download', 'getFile'));
+		app.get(prefix, app.oauth.authorise(), (function(req, res) {
+
+			this.act('role:api, category:download, cmd:getFile', {
+				params: req.params,
+				query: req.query,
+				headers: req.headers,
+				body: req.body
+			}, (function(res, err, reply) {
+
+				var name = reply[0],
+					path = reply[1];
+
+				res.download(path, name);
+			}).bind(this, res));
+		}).bind(this));
 
 		done();
 	});
