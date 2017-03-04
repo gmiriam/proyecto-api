@@ -13,7 +13,31 @@
 			email = query.email,
 			enrolledSubjectId = query.enrolledsubjectid,
 			assignedTaskId = query.assignedtaskid,
+			subjectId = query.subjectid,
 			queryObj;
+
+		if (subjectId) {
+			this.act('role:api, category:subject, cmd:findById', {
+				params: {
+					id: subjectId
+				}
+			}, (function(done, err, reply) {
+
+				var subject = reply[0],
+					teachers = subject.teachers,
+					queryObj = {
+						_id: {
+							$in: teachers
+						}
+					};
+
+				User.find(queryObj, (function(done, err, users) {
+
+					done(err, users);
+				}).bind(this, done));
+			}).bind(this, done));
+			return;
+		}
 
 		if (role) {
 			if (role === 'student') {
