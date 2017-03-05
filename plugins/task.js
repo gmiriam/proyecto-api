@@ -190,7 +190,7 @@
 					var task = tasks[i],
 						taskId = task._id;
 
-					removeTaskFound(null, done, null, task);
+					removeTaskFound.bind(this, null, done, null, task);
 				}
 			}
 
