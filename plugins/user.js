@@ -51,6 +51,9 @@
 					}]
 				};
 			} else {
+				if (role.indexOf(',') !== -1) {
+					role = role.split(',');
+				}
 				queryObj = { 'role': role };
 			}
 		}
