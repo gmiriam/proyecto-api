@@ -1,0 +1,76 @@
+module.exports = [{
+	"_id": "58bb02288a65ff0e40f4e81c",
+	"subject": "58baf8d5b1476f284c7e24c4",
+	"student": "58b9efa74292712910605dbc",
+	"finalScore": 10
+}, {
+	"_id": "58bb02288a65ff0e40f4e81d",
+	"subject": "58baf8d5b1476f284c7e24c4",
+	"student": "58b9efdb4292712910605dbe",
+	"finalScore": 10
+}, {
+	"_id": "58bb02288a65ff0e40f4e81e",
+	"subject": "58baf8d5b1476f284c7e24c4",
+	"student": "58b9f0d14292712910605dc1",
+	"finalScore": 10
+}, {
+	"_id": "58bb4c96128c171ad4e082ad",
+	"subject": "58baf8d5b1476f284c7e24c4",
+	"student": "58b9ef864292712910605dba",
+	"finalScore": 10
+}, {
+	"_id": "58bc0de31ac2b00accc1b188",
+	"subject": "58bc09b71ac2b00accc1b183",
+	"student": "58b9ef864292712910605dba",
+	"finalScore": 2.5
+}, {
+	"_id": "58bc0de31ac2b00accc1b189",
+	"subject": "58bc09b71ac2b00accc1b183",
+	"student": "58b9f1834292712910605dc8",
+	"finalScore": 5
+}, {
+	"_id": "58bc0de31ac2b00accc1b18a",
+	"subject": "58bc09b71ac2b00accc1b183",
+	"student": "58b9f1244292712910605dc4",
+	"finalScore": 0
+}, {
+	"_id": "58bc0de31ac2b00accc1b18b",
+	"subject": "58bc09b71ac2b00accc1b183",
+	"student": "58b9f1b34292712910605dcb",
+	"finalScore": 1.7
+}, {
+	"_id": "58bc0de31ac2b00accc1b18c",
+	"subject": "58bc09b71ac2b00accc1b183",
+	"student": "58bc0d1a1ac2b00accc1b186",
+	"finalScore": 7.5
+}, {
+	"_id": "58bc0de31ac2b00accc1b18d",
+	"subject": "58bc09b71ac2b00accc1b183",
+	"student": "58b9efeb4292712910605dbf",
+	"finalScore": 0
+}, {
+	"_id": "58bc0df11ac2b00accc1b18e",
+	"subject": "58baf8d5b1476f284c7e24c4",
+	"student": "58bc0d1a1ac2b00accc1b186",
+	"finalScore": 10
+}, {
+	"_id": "58bc0dff1ac2b00accc1b18f",
+	"subject": "58bb0d358a65ff0e40f4e81f",
+	"student": "58b9efa74292712910605dbc"
+}, {
+	"_id": "58bc0dff1ac2b00accc1b190",
+	"subject": "58bb0d358a65ff0e40f4e81f",
+	"student": "58b9f1004292712910605dc3"
+}, {
+	"_id": "58bc0dff1ac2b00accc1b191",
+	"subject": "58bb0d358a65ff0e40f4e81f",
+	"student": "58bc0d1a1ac2b00accc1b186"
+}, {
+	"_id": "58bc3e362cbfc31df0c66352",
+	"subject": "58bc3e232cbfc31df0c66351",
+	"student": "58b9ef2b4292712910605db8"
+}, {
+	"_id": "58bc3e362cbfc31df0c66353",
+	"subject": "58bc3e232cbfc31df0c66351",
+	"student": "58bc0d5e1ac2b00accc1b187"
+}];

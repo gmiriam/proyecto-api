@@ -1,0 +1,262 @@
+module.exports = [{
+	"_id": "58b9b6ec74a7821e0c4dca3f",
+	"firstName": "Alejandro",
+	"email": "admin@ull.es",
+	"password": "1234",
+	"role": "admin",
+	"assignedTasks": [],
+	"enrolledSubjects": [],
+	"surname": "Armas"
+}, {
+	"_id": "58b9e2db4292712910605db2",
+	"role": "admin",
+	"firstName": "Pedro",
+	"surname": "Avilés",
+	"email": "a",
+	"password": "1",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9e2f24292712910605db3",
+	"role": "admin",
+	"firstName": "Sara",
+	"surname": "Betancourt",
+	"email": "b",
+	"password": "2",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9ed9c4292712910605db4",
+	"role": "admin",
+	"firstName": "Oscar",
+	"surname": "Cáceres",
+	"email": "c",
+	"password": "3",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9ee464292712910605db6",
+	"role": "teacher",
+	"firstName": "María",
+	"surname": "Armas",
+	"email": "ap",
+	"password": "1",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9eebc4292712910605db7",
+	"role": "teacher",
+	"firstName": "Jose",
+	"surname": "Bernabé",
+	"email": "bp",
+	"password": "2",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9ef2b4292712910605db8",
+	"role": "teacher",
+	"firstName": "Alfonso",
+	"surname": "Carmena",
+	"email": "cp",
+	"password": "3",
+	"assignedTasks": [],
+	"enrolledSubjects": ["58bc3e232cbfc31df0c66351"]
+}, {
+	"_id": "58b9ef614292712910605db9",
+	"role": "teacher",
+	"firstName": "Eugenia",
+	"surname": "Dolores",
+	"email": "dp",
+	"password": "4",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9ef864292712910605dba",
+	"role": "student",
+	"firstName": "Alejandro",
+	"surname": "Abad",
+	"email": "ae",
+	"password": "1",
+	"assignedTasks": ["58bb4d0f128c171ad4e082ae", "58bc10691ac2b00accc1b196", "58bc0e5e1ac2b00accc1b192"],
+	"enrolledSubjects": ["58baf8d5b1476f284c7e24c4", "58bc09b71ac2b00accc1b183"]
+}, {
+	"_id": "58b9efa74292712910605dbc",
+	"role": "student",
+	"firstName": "Dolores",
+	"surname": "Arjona",
+	"email": "a2e",
+	"password": "2",
+	"assignedTasks": [],
+	"enrolledSubjects": ["58baf8d5b1476f284c7e24c4", "58bb0d358a65ff0e40f4e81f"]
+}, {
+	"_id": "58b9efc54292712910605dbd",
+	"role": "student",
+	"firstName": "Soledad",
+	"surname": "Arrollo",
+	"email": "a3e",
+	"password": "3",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9efdb4292712910605dbe",
+	"role": "student",
+	"firstName": "Pedro",
+	"surname": "Barajas",
+	"email": "b1e",
+	"password": "2",
+	"assignedTasks": [],
+	"enrolledSubjects": ["58baf8d5b1476f284c7e24c4"]
+}, {
+	"_id": "58b9efeb4292712910605dbf",
+	"role": "student",
+	"firstName": "Correa",
+	"surname": "Bernabé",
+	"email": "b2e",
+	"password": "2",
+	"assignedTasks": ["58bc10691ac2b00accc1b196"],
+	"enrolledSubjects": ["58bc09b71ac2b00accc1b183"]
+}, {
+	"_id": "58b9f0d14292712910605dc1",
+	"role": "student",
+	"firstName": "Simone",
+	"surname": "Bonacina",
+	"email": "b3e",
+	"password": "3",
+	"assignedTasks": [],
+	"enrolledSubjects": ["58baf8d5b1476f284c7e24c4"]
+}, {
+	"_id": "58b9f0e94292712910605dc2",
+	"role": "student",
+	"firstName": "Simón",
+	"surname": "Cabrera",
+	"email": "c1e",
+	"password": "1",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9f1004292712910605dc3",
+	"role": "student",
+	"firstName": "Rosalía",
+	"surname": "Cervantes",
+	"email": "c2e",
+	"password": "2",
+	"assignedTasks": [],
+	"enrolledSubjects": ["58bb0d358a65ff0e40f4e81f"]
+}, {
+	"_id": "58b9f1244292712910605dc4",
+	"role": "student",
+	"firstName": "Bartolo",
+	"surname": "Cigüeña",
+	"email": "c3e",
+	"password": "3",
+	"assignedTasks": ["58bc10691ac2b00accc1b196"],
+	"enrolledSubjects": ["58bc09b71ac2b00accc1b183"]
+}, {
+	"_id": "58b9f1354292712910605dc5",
+	"role": "student",
+	"firstName": "Francisco",
+	"surname": "Correa",
+	"email": "c4e",
+	"password": "4",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9f1714292712910605dc7",
+	"role": "student",
+	"firstName": "Germán",
+	"surname": "Dávila",
+	"email": "d1e",
+	"password": "1",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9f1834292712910605dc8",
+	"role": "student",
+	"firstName": "Sergio",
+	"surname": "Débil",
+	"email": "d2e",
+	"password": "2",
+	"assignedTasks": ["58bc10691ac2b00accc1b196"],
+	"enrolledSubjects": ["58bc09b71ac2b00accc1b183"]
+}, {
+	"_id": "58b9f19f4292712910605dca",
+	"role": "student",
+	"firstName": "Carmen",
+	"surname": "Dictador",
+	"email": "d3e",
+	"password": "3",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58b9f1b34292712910605dcb",
+	"role": "student",
+	"firstName": "Jonay",
+	"surname": "Dolores",
+	"email": "d4e",
+	"password": "4",
+	"assignedTasks": ["58bc10691ac2b00accc1b196"],
+	"enrolledSubjects": ["58bc09b71ac2b00accc1b183"]
+}, {
+	"_id": "58bb4e85128c171ad4e082af",
+	"role": "teacher",
+	"firstName": "Martina",
+	"surname": "Egea",
+	"email": "ep",
+	"password": "4",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58bbff7ab6738b176c90512c",
+	"role": "admin",
+	"firstName": "Antonio",
+	"surname": "De la Rosa",
+	"email": "antonio@ull.es",
+	"password": "antonio",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58bc0032b6738b176c90512d",
+	"role": "teacher",
+	"firstName": "Alicia",
+	"surname": "Fernández",
+	"email": "alicia@ull.es",
+	"password": "alicia",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58bc0128b6738b176c90512e",
+	"role": "student",
+	"firstName": "Sandra",
+	"surname": "Echenique",
+	"email": "sandra@ull.es",
+	"password": "sandra",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58bc0c951ac2b00accc1b184",
+	"role": "admin",
+	"firstName": "Sara",
+	"surname": "Elías",
+	"email": "admin",
+	"password": "admin",
+	"assignedTasks": [],
+	"enrolledSubjects": []
+}, {
+	"_id": "58bc0d1a1ac2b00accc1b186",
+	"role": "student",
+	"firstName": "Adam",
+	"surname": "Egea",
+	"email": "adam@ull.es",
+	"password": "1234",
+	"assignedTasks": ["58bc10691ac2b00accc1b196", "58bc0e5e1ac2b00accc1b192", "58bc0f421ac2b00accc1b194", "58bc0fac1ac2b00accc1b195"],
+	"enrolledSubjects": ["58bc09b71ac2b00accc1b183", "58baf8d5b1476f284c7e24c4", "58bb0d358a65ff0e40f4e81f"]
+}, {
+	"_id": "58bc0d5e1ac2b00accc1b187",
+	"role": "teacher",
+	"firstName": "Beatriz",
+	"surname": "García",
+	"email": "bea@ull.es",
+	"password": "5678",
+	"assignedTasks": [],
+	"enrolledSubjects": ["58bc3e232cbfc31df0c66351"]
+}];

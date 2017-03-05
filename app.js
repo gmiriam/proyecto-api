@@ -31,6 +31,8 @@ senecaInstance
 			};
 
 		this
+			// Uncomment next plugin line to clear and load initial content (both files and database)
+			//.use("plugins/loadInitialDataExample", props)
 			.use("plugins/oauth", props)
 			.use("plugins/download", props)
 			.use("plugins/upload", props)
