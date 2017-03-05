@@ -4,11 +4,11 @@ var multer = require('multer'),
 	uuid = require('uuid/v4'),
 	childProcess = require('child_process');
 
-module.exports = function upload (options) {
+module.exports = function upload(options) {
 
 	var app = options.app;
 
-	function fileManagement(res,file,fileTarget) {
+	function fileManagement(res, file, fileTarget) {
 
 		var filename = file.filename,
 			path = file.destination,
@@ -18,19 +18,29 @@ module.exports = function upload (options) {
 			moveFile(path, filename, "attachments");
 		} else if(fileTarget === "tests") {
 			moveFile(path, filename, "tests");
+		} else if(fileTarget === "temaries") {
+			moveFile(path, filename, "temaries");
 		} else if (fileTarget === "deliveries") {
 			if (fileMimeType === 'application/x-zip-compressed') {
 				var filenameWithoutExtension = filename.split('.')[0];
-				uncompressFile(path, filename, filenameWithoutExtension)
-				res.json({error_code:0,err_desc:null,filename:filenameWithoutExtension});
+				uncompressFile(path, filename, filenameWithoutExtension);
+				res.json({
+					error_code: 0,
+					err_desc: null,
+					filename: filenameWithoutExtension
+				});
 			}
 			return;
 		}
 
-		res.json({error_code:0,err_desc:null,filename:filename});
+		res.json({
+			error_code: 0,
+			err_desc: null,
+			filename:filename
+		});
 	}
 
-	function moveFile(path, filename, fileToDestination){
+	function moveFile(path, filename, fileToDestination) {
 
 		var exec = childProcess.exec;
 			cmd = "mv",
@@ -41,25 +51,22 @@ module.exports = function upload (options) {
 
 	function childProcessCbk(err, stdout, stderr) {
 
-		console.log("err:", err, " stdout:", stdout, " stderr:", stderr);
+		err && console.log(err);
 	}
 
 	function uncompressFile(path, filename, filenameWithoutExtension) {
 
-		var outputPath = path + "/deliveries/" + filenameWithoutExtension;
+		var deliveriesPath = path + "deliveries/",
+			outputPath = deliveriesPath + filenameWithoutExtension;
 
 		fs.createReadStream(path + filename)
 			.pipe(unzip.Extract({
 				path: outputPath
 			}))
-			.on('finish', function () {
+			.on('finish', (function(path, filename, destination) {
 
-				var exec = childProcess.exec;
-					cmd = "rm",
-					args =	path + "/" + filename;
-
-				exec(cmd + " " + args, childProcessCbk);
-			});
+				moveFile(path, filename, destination);
+			}).bind(this, path, filename, "deliveries/" + filenameWithoutExtension));
 	}
 
 	this.add('init:upload', init);
