@@ -299,9 +299,14 @@ module.exports = function delivery(options) {
 	this.add('role:api, category:delivery, cmd:runTest', function(args, done) {
 
 		var delivery = args.delivery,
-			task = args.task,
-			seneca = this,
+			task = args.task;
 
+		if (!task || !task.evaluationTest) {
+			done(null);
+			return;
+		}
+
+		var seneca = this,
 			exec = ChildProcess.exec;
 			cmd = "node_modules\\.bin\\intern-client",
 			pathToTest = "data/tests/",
