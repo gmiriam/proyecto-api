@@ -96,7 +96,7 @@ var getUser = function(username, password, callback) {
 	userModel.findOne({
 		email: username,
 		password: password
-	}, callback);
+	}).select('+password').exec(callback);
 };
 
 /**

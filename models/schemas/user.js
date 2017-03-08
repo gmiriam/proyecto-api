@@ -1,4 +1,4 @@
-﻿module.exports = {
+module.exports = {
 	firstName: {
 		type: String,
 		trim: true,
@@ -15,7 +15,8 @@
 	},
 	password: {
 		type: String,
-		required: true
+		required: true,
+		select: false
 	},
 	role: {
 		type: String,
