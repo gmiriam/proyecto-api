@@ -1,4 +1,4 @@
-﻿module.exports = function task(options) {
+module.exports = function task(options) {
 
 	var mongoose = require('mongoose'),
 		Task = mongoose.model('task'),
@@ -423,4 +423,4 @@
 	});
 
 	return 'task';
-}
+};

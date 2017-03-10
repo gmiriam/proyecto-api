@@ -307,7 +307,7 @@ module.exports = function delivery(options) {
 		}
 
 		var seneca = this,
-			exec = ChildProcess.exec;
+			exec = ChildProcess.exec,
 			cmd = "node_modules\\.bin\\intern-client",
 			pathToTest = "data/tests/",
 			pathToCode = "data/deliveries/",
@@ -399,4 +399,4 @@ module.exports = function delivery(options) {
 	});
 
 	return 'delivery';
-}
+};

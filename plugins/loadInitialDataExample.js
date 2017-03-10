@@ -1,4 +1,4 @@
-﻿module.exports = function loadInitialDataExample(options) {
+module.exports = function loadInitialDataExample(options) {
 
 	var mongoose = require('mongoose'),
 		childProcess = require('child_process'),
@@ -52,12 +52,12 @@
 
 	this.add('role:api, category:loadInitialDataExample, cmd:deleteOldFiles', function(args, done) {
 
-		var path = './data';
+		var path = './data',
 
 			cmd = "rm",
-			args = "-R " + path + "/*";
+			params = "-R " + path + "/*";
 
-		exec(cmd + " " + args, (function(done) {
+		exec(cmd + " " + params, (function(done) {
 
 			done();
 		}).bind(this, done));
@@ -68,7 +68,7 @@
 		this.act('role:api, category:loadInitialDataExample, cmd:deleteOldFiles', (function(done, err, reply) {
 
 			var filesPath = './initialDataExample/files/*',
-				dstPath = './data';
+				dstPath = './data',
 
 				cmd = "cp",
 				args = "-r " + filesPath + " " + dstPath + "/";
@@ -89,4 +89,4 @@
 	});
 
 	return 'loadInitialDataExample';
-}
+};

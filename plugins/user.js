@@ -1,4 +1,4 @@
-﻿module.exports = function user(options) {
+module.exports = function user(options) {
 
 	var mongoose = require('mongoose'),
 		User = mongoose.model('user'),
@@ -245,4 +245,4 @@
 	});
 
 	return 'user';
-}
+};

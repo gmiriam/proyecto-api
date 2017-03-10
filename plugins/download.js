@@ -1,4 +1,4 @@
-﻿module.exports = function download(options) {
+module.exports = function download(options) {
 
 	var app = options.app,
 		commons = options.commons;
@@ -36,4 +36,4 @@
 	});
 
 	return 'download';
-}
+};

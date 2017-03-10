@@ -1,4 +1,4 @@
-﻿module.exports = function score(options) {
+module.exports = function score(options) {
 
 	var mongoose = require('mongoose'),
 		Score = mongoose.model('score'),
@@ -268,4 +268,4 @@
 	});
 
 	return 'score';
-}
+};

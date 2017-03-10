@@ -1,4 +1,4 @@
-﻿module.exports = function subject(options) {
+module.exports = function subject(options) {
 
 	var mongoose = require('mongoose'),
 		Subject = mongoose.model('subject'),
@@ -252,7 +252,7 @@
 	this.add('role:api, category:subject, cmd:unenrollAllStudents', function(args, done) {
 
 		var params = args.params,
-			subjectId = params.subjectid
+			subjectId = params.subjectid,
 			seneca = this;
 
 		User.find({
@@ -310,4 +310,4 @@
 	});
 
 	return 'subject';
-}
+};

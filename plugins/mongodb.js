@@ -1,4 +1,4 @@
-﻿module.exports = function mongodb(options) {
+module.exports = function mongodb(options) {
 
 	var mongoose = require('mongoose');
 
@@ -27,4 +27,4 @@
 	});
 
 	return 'mongodb';
-}
+};
