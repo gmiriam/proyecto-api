@@ -21,13 +21,20 @@ module.exports = function upload(options) {
 		} else if(fileTarget === "temaries") {
 			moveFile(path, filename, "temaries");
 		} else if (fileTarget === "deliveries") {
-			if (fileMimeType === 'application/x-zip-compressed') {
+			if (fileMimeType === 'application/x-zip-compressed' ||
+				fileMimeType === 'application/zip') {
+
 				var filenameWithoutExtension = filename.split('.')[0];
 				uncompressFile(path, filename, filenameWithoutExtension);
 				res.json({
 					error_code: 0,
 					err_desc: null,
 					filename: filenameWithoutExtension
+				});
+			} else {
+				res.status(500).json({
+					error_code: 1,
+					err_desc: 'Invalid file format'
 				});
 			}
 			return;
@@ -42,7 +49,7 @@ module.exports = function upload(options) {
 
 	function moveFile(path, filename, fileToDestination) {
 
-		var exec = childProcess.exec;
+		var exec = childProcess.exec,
 			cmd = "mv",
 			args = path + filename + " " + path + fileToDestination + "/";
 
@@ -51,7 +58,9 @@ module.exports = function upload(options) {
 
 	function childProcessCbk(err, stdout, stderr) {
 
-		err && console.log(err);
+		if(err) {
+			console.log(err);
+		}
 	}
 
 	function uncompressFile(path, filename, filenameWithoutExtension) {
@@ -112,4 +121,4 @@ module.exports = function upload(options) {
 	}
 
 	return 'upload';
-}
+};
