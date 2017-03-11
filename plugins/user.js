@@ -21,9 +21,10 @@ module.exports = function user(options) {
 				params: {
 					id: subjectId
 				}
-			}, (function(done, err, reply) {
+			}, (function(args, err, reply) {
 
-				var subject = reply[0],
+				var done = args.done,
+					subject = reply[0],
 					teachers = subject.teachers,
 					queryObj = {
 						_id: {
@@ -31,11 +32,12 @@ module.exports = function user(options) {
 						}
 					};
 
-				User.find(queryObj, (function(done, err, users) {
+				User.find(queryObj, (function(args, err, users) {
 
+					var done = args.done;
 					done(err, users);
-				}).bind(this, done));
-			}).bind(this, done));
+				}).bind(this, { done }));
+			}).bind(this, { done }));
 			return;
 		}
 
@@ -70,10 +72,11 @@ module.exports = function user(options) {
 			queryObj = { 'assignedTasks': assignedTaskId };
 		}
 
-		User.find(queryObj, function(err, users) {
+		User.find(queryObj, (function(args, err, users) {
 
+			var done = args.done;
 			done(err, users);
-		});
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:user, cmd:findById', function(args, done) {
@@ -81,8 +84,9 @@ module.exports = function user(options) {
 		var params = args.params,
 			id = params.id;
 
-		User.findById(id, function(err, user) {
+		User.findById(id, (function(args, err, user) {
 
+			var done = args.done;
 			if (err) {
 				done(err);
 			} else if (!user) {
@@ -90,7 +94,7 @@ module.exports = function user(options) {
 			} else {
 				done(null, [user]);
 			}
-		});
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:user, cmd:create', function(args, done) {
@@ -103,10 +107,13 @@ module.exports = function user(options) {
 
 		var user = new User(data);
 
-		user.save(function(err) {
+		user.save((function(args, err) {
+
+			var done = args.done,
+				user = args.user;
 
 			done(err, [user]);
-		});
+		}).bind(this, { done, user }));
 	});
 
 	this.add('role:api, category:user, cmd:update', function(args, done) {
@@ -116,7 +123,10 @@ module.exports = function user(options) {
 			id = params.id,
 			data = body.data;
 
-		User.findById(id, function(err, user) {
+		User.findById(id, (function(args, err, user) {
+
+			var done = args.done,
+				data = args.data;
 
 			if (err) {
 				done(err);
@@ -130,22 +140,25 @@ module.exports = function user(options) {
 					}
 				}
 
-				user.save(function(err) {
+				user.save((function(args, err) {
+
+					var done = args.done,
+						user = args.user;
 
 					done(err, [user]);
-				});
+				}).bind(this, { done, user }));
 			}
-		});
+		}).bind(this, { done, data }));
 	});
 
 	this.add('role:api, category:user, cmd:delete', function(args, done) {
 
 		var params = args.params,
-			id = params.id,
-			seneca = this;
+			id = params.id;
 
-		User.findById(id, function(err, user) {
+		User.findById(id, (function(args, err, user) {
 
+			var done = args.done;
 			if (err) {
 				done(err);
 			} else if (!user) {
@@ -156,7 +169,7 @@ module.exports = function user(options) {
 					assignedTasks = user.assignedTasks;
 
 				if (enrolledSubjects && enrolledSubjects.length) {
-					seneca.act('role:api, category:score, cmd:delete', {
+					this.act('role:api, category:score, cmd:delete', {
 						params: {
 							studentid: userId
 						}
@@ -164,19 +177,20 @@ module.exports = function user(options) {
 				}
 
 				if (assignedTasks && assignedTasks.length) {
-					seneca.act('role:api, category:delivery, cmd:delete', {
+					this.act('role:api, category:delivery, cmd:delete', {
 						params: {
 							studentid: userId
 						}
 					});
 				}
 
-				user.remove(function(err) {
+				user.remove((function(args, err) {
 
+					var done = args.done;
 					done(err);
-				});
+				}).bind(this, { done }));
 			}
-		});
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:user, cmd:checkUserHasOwnToken', function(args, done) {
@@ -191,7 +205,10 @@ module.exports = function user(options) {
 
 		Token.findOne({
 			accessToken: userToken
-		}, (function(userId, err, token) {
+		}, (function(args, err, token) {
+
+			var done = args.done,
+				userId = args.userId;
 
 			if (err) {
 				done(err);
@@ -204,15 +221,17 @@ module.exports = function user(options) {
 					query: {
 						email: user.email
 					}
-				}, (function(userId, args, reply) {
+				}, (function(args, err, reply) {
 
-					var user = reply[0],
+					var done = args.done,
+						userId = args.userId,
+						user = reply[0],
 						hasOwnToken = userId === user._id.toString();
 
-					done(null, { hasOwnToken: hasOwnToken });
-				}).bind(this, userId));
+					done(err, { hasOwnToken });
+				}).bind(this, { done, userId }));
 			}
-		}).bind(this, userId));
+		}).bind(this, { done, userId }));
 	});
 
 	this.add('init:user', function(args, done) {

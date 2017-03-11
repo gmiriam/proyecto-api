@@ -23,13 +23,14 @@ module.exports = function download(options) {
 				query: req.query,
 				headers: req.headers,
 				body: req.body
-			}, (function(res, err, reply) {
+			}, (function(args, err, reply) {
 
-				var name = reply[0],
+				var res = args.res,
+					name = reply[0],
 					path = reply[1];
 
 				res.download(path, name);
-			}).bind(this, res));
+			}).bind(this, { res }));
 		}).bind(this));
 
 		done();

@@ -9,13 +9,16 @@ module.exports = function loadInitialDataExample(options) {
 		var model = args.model,
 			data = args.data;
 
-		model.remove({}, (function(model, data, err) {
+		model.remove({}, (function(args, err) {
+
+			var model = args.model,
+				data = args.data;
 
 			for (var i = 0; i < data.length; i++) {
 				var modelInstance = new model(data[i]);
 				modelInstance.save();
 			}
-		}).bind(this, model, data));
+		}).bind(this, { model, data }));
 
 		done();
 	});
@@ -57,27 +60,30 @@ module.exports = function loadInitialDataExample(options) {
 			cmd = "rm",
 			params = "-R " + path + "/*";
 
-		exec(cmd + " " + params, (function(done) {
+		exec(cmd + " " + params, (function(args, err, stdout, stderr) {
 
-			done();
-		}).bind(this, done));
+			var done = args.done;
+			done(err);
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:loadInitialDataExample, cmd:loadFiles', function(args, done) {
 
-		this.act('role:api, category:loadInitialDataExample, cmd:deleteOldFiles', (function(done, err, reply) {
+		this.act('role:api, category:loadInitialDataExample, cmd:deleteOldFiles', (function(args, err, reply) {
 
-			var filesPath = './initialDataExample/files/*',
+			var done = args.done,
+				filesPath = './initialDataExample/files/*',
 				dstPath = './data',
 
 				cmd = "cp",
-				args = "-r " + filesPath + " " + dstPath + "/";
+				params = "-r " + filesPath + " " + dstPath + "/";
 
-			exec(cmd + " " + args, (function(done) {
+			exec(cmd + " " + params, (function(args, err, stdout, stderr) {
 
-				done();
-			}).bind(this, done));
-		}).bind(this, done));
+				var done = args.done;
+				done(err);
+			}).bind(this, { done }));
+		}).bind(this, { done }));
 	});
 
 	this.add('init:loadInitialDataExample', function(args, done) {

@@ -2,7 +2,6 @@ module.exports = function score(options) {
 
 	var mongoose = require('mongoose'),
 		Score = mongoose.model('score'),
-		User = mongoose.model('user'),
 		app = options.app,
 		commons = options.commons;
 
@@ -21,10 +20,11 @@ module.exports = function score(options) {
 			queryObj.student = studentId;
 		}
 
-		Score.find(queryObj, function(err, scores) {
+		Score.find(queryObj, (function(args, err, scores) {
 
+			var done = args.done;
 			done(err, scores);
-		});
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:score, cmd:findById', function(args, done) {
@@ -32,8 +32,9 @@ module.exports = function score(options) {
 		var params = args.params,
 			id = params.id;
 
-		Score.findById(id, function(err, score) {
+		Score.findById(id, (function(args, err, score) {
 
+			var done = args.done;
 			if (err) {
 				done(err);
 			} else if (!score) {
@@ -41,7 +42,7 @@ module.exports = function score(options) {
 			} else {
 				done(null, [score]);
 			}
-		});
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:score, cmd:create', function(args, done) {
@@ -52,19 +53,25 @@ module.exports = function score(options) {
 		Score.findOne({
 			subject: data.subject,
 			student: data.student
-		}, function(err, score) {
+		}, (function(args, err, score) {
+
+			var done = args.done,
+				data = args.data;
 
 			if (err || score) {
 				done(err);
 			} else {
 				var newScore = new Score(data);
 
-				newScore.save(function(err) {
+				newScore.save((function(args, err) {
+
+					var done = args.done,
+						newScore = args.newScore;
 
 					done(err, [newScore]);
-				});
+				}).bind(this, { done, newScore }));
 			}
-		});
+		}).bind(this, { done, data }));
 	});
 
 	this.add('role:api, category:score, cmd:update', function(args, done) {
@@ -75,7 +82,10 @@ module.exports = function score(options) {
 			data = body.data,
 			finalScore = data.finalScore;
 
-		Score.findById(id, function(err, score) {
+		Score.findById(id, (function(args, err, score) {
+
+			var done = args.done,
+				finalScore = args.finalScore;
 
 			if (err) {
 				done(err);
@@ -83,12 +93,15 @@ module.exports = function score(options) {
 				done(new Error("Not found"));
 			} else {
 				score.finalScore = finalScore;
-				score.save(function(err) {
+				score.save((function(args, err) {
+
+					var done = args.done,
+						score = args.score;
 
 					done(err, [score]);
-				});
+				}).bind(this, { done, score }));
 			}
-		});
+		}).bind(this, { done, finalScore }));
 	});
 
 	this.add('role:api, category:score, cmd:delete', function(args, done) {
@@ -98,22 +111,25 @@ module.exports = function score(options) {
 			studentId = params.studentid,
 			id = params.id;
 
-		function removeScoreFound(err, score) {
+		function removeScoreFound(args, err, score) {
 
+			var done = args.done;
 			if (err) {
 				done(err);
 			} else if (!score) {
 				done(new Error("Not found"));
 			} else {
-				score.remove(function(err) {
+				score.remove((function(args, err) {
 
+					var done = args.done;
 					done(err);
-				});
+				}).bind(this, { done }));
 			}
 		}
 
-		function removeScoresFound(err, scores) {
+		function removeScoresFound(args, err, scores) {
 
+			var done = args.done;
 			if (!err) {
 				for (var i = 0; i < scores.length; i++) {
 					scores[i].remove();
@@ -127,17 +143,17 @@ module.exports = function score(options) {
 			Score.findOne({
 				subject: subjectId,
 				student: studentId
-			}, removeScoreFound);
+			}, removeScoreFound.bind(this, { done }));
 		} else if (studentId) {
 			Score.find({
 				student: studentId
-			}, removeScoresFound);
+			}, removeScoresFound.bind(this, { done }));
 		} else if (subjectId) {
 			Score.find({
 				subject: subjectId
-			}, removeScoresFound);
+			}, removeScoresFound.bind(this, { done }));
 		} else {
-			Score.findById(id, removeScoreFound);
+			Score.findById(id, removeScoreFound.bind(this, { done }));
 		}
 	});
 
@@ -156,18 +172,24 @@ module.exports = function score(options) {
 				subjectid: subjectId,
 				studentid: studentId
 			}
-		}, (function(subjectId, studentId, err, reply) {
+		}, (function(args, err, reply) {
 
-			var score = reply[0];
+			var done = args.done,
+				subjectId = args.subjectId,
+				studentId = args.studentId,
+				score = reply[0];
 
 			this.act('role:api, category:task, cmd:findAll', {
 				query: {
 					subjectid: subjectId,
 					userid: studentId
 				}
-			}, (function(studentId, score, err, reply) {
+			}, (function(args, err, reply) {
 
-				var tasks = reply,
+				var done = args.done,
+					studentId = args.studentId,
+					score = args.score,
+					tasks = reply,
 					promises = [];
 
 				for (var i = 0; i < tasks.length; i++) {
@@ -189,39 +211,48 @@ module.exports = function score(options) {
 							taskid: taskId,
 							studentid: studentId
 						}
-					}, (function(maxScore, promiseHandler, err, reply) {
+					}, (function(args, err, reply) {
 
-						var delivery = reply[0];
+						var maxScore = args.maxScore,
+							promiseHandler = args.promiseHandler,
+							delivery = reply[0];
 
 						if (!delivery) {
 							promiseHandler.resolve(null);
-							return;
+						} else {
+							promiseHandler.resolve({
+								maxScore: maxScore,
+								score: delivery.score
+							});
 						}
-
-						promiseHandler.resolve({
-							maxScore: maxScore,
-							score: delivery.score
-						});
-					}).bind(this, maxScore, promiseHandler));
+					}).bind(this, { maxScore, promiseHandler }));
 				}
 
-				Promise.all(promises).then((function(score, results) {
+				Promise.all(promises).then((function(args, results) {
+
+					var done = args.done,
+						score = args.score;
 
 					this.act('role:api, category:score, cmd:calculateScore', {
 						scoreData: results
-					}, (function(score, err, reply) {
+					}, (function(args, err, reply) {
 
-						var finalScore = reply.finalScore;
+						var done = args.done,
+							score = args.score,
+							finalScore = reply.finalScore;
 
 						score.finalScore = finalScore;
-						score.save(function(err) {
+						score.save((function(args, err) {
+
+							var done = args.done,
+								score = args.score;
 
 							done(err, [score]);
-						});
-					}).bind(this, score));
-				}).bind(this, score));
-			}).bind(this, studentId, score));
-		}).bind(this, subjectId, studentId));
+						}).bind(this, { done, score }));
+					}).bind(this, { done, score }));
+				}).bind(this, { done, score }));
+			}).bind(this, { done, studentId, score }));
+		}).bind(this, { done, subjectId, studentId }));
 	});
 
 	this.add('role:api, category:score, cmd:calculateScore', function(args, done) {

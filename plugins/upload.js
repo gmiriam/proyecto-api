@@ -2,7 +2,8 @@ var multer = require('multer'),
 	unzip = require('unzip'),
 	fs = require('fs'),
 	uuid = require('uuid/v4'),
-	childProcess = require('child_process');
+	childProcess = require('child_process'),
+	exec = childProcess.exec;
 
 module.exports = function upload(options) {
 
@@ -16,11 +17,15 @@ module.exports = function upload(options) {
 
 		if (fileTarget === "attached") {
 			moveFile(path, filename, "attachments");
+
 		} else if(fileTarget === "tests") {
 			moveFile(path, filename, "tests");
+
 		} else if(fileTarget === "temaries") {
 			moveFile(path, filename, "temaries");
+
 		} else if (fileTarget === "deliveries") {
+
 			if (fileMimeType === 'application/x-zip-compressed' ||
 				fileMimeType === 'application/zip') {
 
@@ -37,6 +42,7 @@ module.exports = function upload(options) {
 					err_desc: 'Invalid file format'
 				});
 			}
+
 			return;
 		}
 
@@ -49,8 +55,7 @@ module.exports = function upload(options) {
 
 	function moveFile(path, filename, fileToDestination) {
 
-		var exec = childProcess.exec,
-			cmd = "mv",
+		var cmd = "mv",
 			args = path + filename + " " + path + fileToDestination + "/";
 
 		exec(cmd + " " + args, childProcessCbk);
@@ -58,7 +63,7 @@ module.exports = function upload(options) {
 
 	function childProcessCbk(err, stdout, stderr) {
 
-		if(err) {
+		if (err) {
 			console.log(err);
 		}
 	}
@@ -72,22 +77,20 @@ module.exports = function upload(options) {
 			.pipe(unzip.Extract({
 				path: outputPath
 			}))
-			.on('finish', (function(path, filename, destination) {
+			.on('close', (function(path, filename, destination) {
 
 				moveFile(path, filename, destination);
 			}).bind(this, path, filename, "deliveries/" + filenameWithoutExtension));
 	}
 
-	this.add('init:upload', init);
-
-	function init(msg, respond) {
+	this.add('init:upload', function(args, done) {
 
 		var storage = multer.diskStorage({
-			destination: function (req, file, cb) {
+			destination: function(req, file, cb) {
 
 				cb(null, './data/');
 			},
-			filename: function (req, file, cb) {
+			filename: function(req, file, cb) {
 
 				var fileName = uuid();
 				cb(null, fileName + '.' + file.originalname.split('.')[file.originalname.split('.').length - 1]);
@@ -100,25 +103,27 @@ module.exports = function upload(options) {
 
 		app.post('/upload', app.oauth.authorise(), function(req, res) {
 
-			upload(req,res,function(err) {
+			upload(req, res, (function(args, err) {
 
-				var file = req.file,
+				var req = args.req,
+					res = args.res,
+					file = req.file,
 					body = req.body,
 					fileTarget = body.fileTarget;
 
 				if (err) {
 					res.json({
-						error_code:1,
-						err_desc:err
+						error_code: 1,
+						err_desc: err
 					});
-					return;
+				} else {
+					fileManagement(res, file, fileTarget);
 				}
-				fileManagement(res, file, fileTarget);
-			});
+			}).bind(this, { req, res }));
 		});
 
-		respond();
-	}
+		done();
+	});
 
 	return 'upload';
 };
