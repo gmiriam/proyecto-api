@@ -1,6 +1,7 @@
 module.exports = function delivery(options) {
 
-	var mongoose = require('mongoose'),
+	var path = require('path'),
+		mongoose = require('mongoose'),
 		Delivery = mongoose.model('delivery'),
 		childProcess = require('child_process'),
 		exec = childProcess.exec,
@@ -339,8 +340,7 @@ module.exports = function delivery(options) {
 			return;
 		}
 
-		var cmd = "node_modules/.bin/intern-client",
-			//cmd = "node_modules\\.bin\\intern-client",
+		var cmd = path.resolve("node_modules", ".bin", "intern-client"),
 			pathToTest = "data/tests/",
 			pathToCode = "data/deliveries/",
 
