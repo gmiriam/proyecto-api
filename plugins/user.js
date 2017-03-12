@@ -239,26 +239,41 @@ module.exports = function user(options) {
 		var prefix = '/user/';
 
 		app.get(prefix, app.oauth.authorise(),
-			commons.expressCbk.bind(this, 'user', 'findAll'));
+			commons.expressCbk.bind(this, {
+				cat: 'user',
+				cmd: 'findAll'
+			}));
 
 		app.get(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
-			commons.expressCbk.bind(this, 'user', 'findById'));
+			commons.expressCbk.bind(this, {
+				cat: 'user',
+				cmd: 'findById'
+			}));
 
 		app.post(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			commons.expressCbk.bind(this, 'user', 'create'));
+			commons.expressCbk.bind(this, {
+				cat: 'user',
+				cmd: 'create'
+			}));
 
 		app.put(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			commons.expressCbk.bind(this, 'user', 'update'));
+			commons.expressCbk.bind(this, {
+				cat: 'user',
+				cmd: 'update'
+			}));
 
 		app.delete(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			commons.expressCbk.bind(this, 'user', 'delete'));
+			commons.expressCbk.bind(this, {
+				cat: 'user',
+				cmd: 'delete'
+			}));
 
 		done();
 	});

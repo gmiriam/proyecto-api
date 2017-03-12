@@ -445,36 +445,57 @@ module.exports = function task(options) {
 		app.get(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'task', 'findAll'));
+			commons.expressCbk.bind(this, {
+				cat: 'task',
+				cmd: 'findAll'
+			}));
 
 		app.get(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
-			commons.expressCbk.bind(this, 'task', 'findById'));
+			commons.expressCbk.bind(this, {
+				cat: 'task',
+				cmd: 'findById'
+			}));
 
 		app.post(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'task', 'create'));
+			commons.expressCbk.bind(this, {
+				cat: 'task',
+				cmd: 'create'
+			}));
 
 		app.put(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'task', 'update'));
+			commons.expressCbk.bind(this, {
+				cat: 'task',
+				cmd: 'update'
+			}));
 
 		app.delete(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'task', 'delete'));
+			commons.expressCbk.bind(this, {
+				cat: 'task',
+				cmd: 'delete'
+			}));
 
 		app.post(prefix + 'assign', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'task', 'assign'));
+			commons.expressCbk.bind(this, {
+				cat: 'task',
+				cmd: 'assign'
+			}));
 
 		app.post(prefix + 'unassign', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'task', 'unassign'));
+			commons.expressCbk.bind(this, {
+				cat: 'task',
+				cmd: 'unassign'
+			}));
 
 		done();
 	});

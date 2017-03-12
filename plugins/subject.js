@@ -294,36 +294,57 @@ module.exports = function subject(options) {
 		app.get(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrRequestHasUserQueryFilter.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'findAll'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'findAll'
+			}));
 
 		app.get(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'findById'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'findById'
+			}));
 
 		app.post(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'create'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'create'
+			}));
 
 		app.put(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'update'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'update'
+			}));
 
 		app.delete(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'delete'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'delete'
+			}));
 
 		app.post(prefix + 'enrollstudents', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'enrollStudents'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'enrollStudents'
+			}));
 
 		app.post(prefix + 'unenrollstudents', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'unenrollStudents'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'unenrollStudents'
+			}));
 
 		done();
 	});

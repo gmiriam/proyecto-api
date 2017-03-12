@@ -404,34 +404,52 @@ module.exports = function delivery(options) {
 		app.get(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'delivery', 'findAll'));
+			commons.expressCbk.bind(this, {
+				cat: 'delivery',
+				cmd: 'findAll'
+			}));
 
 		app.get(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
-			commons.expressCbk.bind(this, 'delivery', 'findById'));
+			commons.expressCbk.bind(this, {
+				cat: 'delivery',
+				cmd: 'findById'
+			}));
 
 		app.post(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrStudentInSubject.bind(this),
 			commons.checkUserIsAdminOrStudentWithTask.bind(this),
-			commons.expressCbk.bind(this, 'delivery', 'create'));
+			commons.expressCbk.bind(this, {
+				cat: 'delivery',
+				cmd: 'create'
+			}));
 
 		app.put(prefix + ':id/updatescore', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'delivery', 'updateScore'));
+			commons.expressCbk.bind(this, {
+				cat: 'delivery',
+				cmd: 'updateScore'
+			}));
 
 		app.put(prefix + ':id/updatedata', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrStudentInSubject.bind(this),
 			commons.checkUserIsAdminOrStudentWithTask.bind(this),
-			commons.expressCbk.bind(this, 'delivery', 'updateData'));
+			commons.expressCbk.bind(this, {
+				cat: 'delivery',
+				cmd: 'updateData'
+			}));
 
 		app.delete(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrStudentInSubject.bind(this),
 			commons.checkUserIsAdminOrStudentWithTask.bind(this),
-			commons.expressCbk.bind(this, 'delivery', 'delete'));
+			commons.expressCbk.bind(this, {
+				cat: 'delivery',
+				cmd: 'delete'
+			}));
 
 		done();
 	});

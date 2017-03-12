@@ -284,16 +284,25 @@ module.exports = function score(options) {
 		app.get(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrRequestHasUserQueryFilterOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'score', 'findAll'));
+			commons.expressCbk.bind(this, {
+				cat: 'score',
+				cmd: 'findAll'
+			}));
 
 		app.get(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
-			commons.expressCbk.bind(this, 'score', 'findById'));
+			commons.expressCbk.bind(this, {
+				cat: 'score',
+				cmd: 'findById'
+			}));
 
 		app.put(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'score', 'update'));
+			commons.expressCbk.bind(this, {
+				cat: 'score',
+				cmd: 'update'
+			}));
 
 		done();
 	});
