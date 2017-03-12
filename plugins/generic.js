@@ -1,4 +1,4 @@
-﻿module.exports = function generic(options) {
+module.exports = function generic(options) {
 
 	this.add('role:api, category:generic, cmd:sendResponse', function(args, done) {
 
@@ -27,4 +27,4 @@
 	});
 
 	return 'generic';
-}
+};

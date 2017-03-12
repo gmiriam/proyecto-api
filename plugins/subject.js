@@ -1,4 +1,4 @@
-﻿module.exports = function subject(options) {
+module.exports = function subject(options) {
 
 	var mongoose = require('mongoose'),
 		Subject = mongoose.model('subject'),
@@ -24,10 +24,11 @@
 				teachers: teacherId
 			};
 
-			Subject.find(queryObj, (function(done, err, subjects) {
+			Subject.find(queryObj).sort('name').exec((function(args, err, subjects) {
 
+				var done = args.done;
 				done(err, subjects);
-			}).bind(this, done));
+			}).bind(this, { done }));
 
 		} else if (studentId) {
 			if (studentId !== userId) {
@@ -39,27 +40,30 @@
 				params: {
 					id: studentId
 				}
-			}, (function(done, err, reply) {
+			}, (function(args, err, reply) {
 
-				var user = reply[0],
-					subjectIds = user.enrolledSubjects;
+				var done = args.done,
+					user = reply[0],
+					subjectIds = user.enrolledSubjects,
 					queryObj = {
 						_id: {
 							$in: subjectIds
 						}
 					};
 
-				Subject.find(queryObj, (function(done, err, subjects) {
+				Subject.find(queryObj).sort('name').exec((function(args, err, subjects) {
 
+					var done = args.done;
 					done(err, subjects);
-				}).bind(this, done));
-			}).bind(this, done));
+				}).bind(this, { done }));
+			}).bind(this, { done }));
 
 		} else {
-			Subject.find(function(err, subjects) {
+			Subject.find().sort('name').exec((function(args, err, subjects) {
 
+				var done = args.done;
 				done(err, subjects);
-			});
+			}).bind(this, { done }));
 		}
 	});
 
@@ -68,8 +72,9 @@
 		var params = args.params,
 			id = params.id;
 
-		Subject.findById(id, function(err, subject) {
+		Subject.findById(id, (function(args, err, subject) {
 
+			var done = args.done;
 			if (err) {
 				done(err);
 			} else if (!subject) {
@@ -77,7 +82,7 @@
 			} else {
 				done(null, [subject]);
 			}
-		});
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:subject, cmd:create', function(args, done) {
@@ -86,10 +91,13 @@
 			data = body.data,
 			subject = new Subject(data);
 
-		subject.save(function(err) {
+		subject.save((function(args, err) {
+
+			var done = args.done,
+				subject = args.subject;
 
 			done(err, [subject]);
-		});
+		}).bind(this, { done, subject }));
 	});
 
 	this.add('role:api, category:subject, cmd:update', function(args, done) {
@@ -99,7 +107,10 @@
 			id = params.id,
 			data = body.data;
 
-		Subject.findById(id, function(err, subject) {
+		Subject.findById(id, (function(args, err, subject) {
+
+			var done = args.done,
+				data = args.data;
 
 			if (err) {
 				done(err);
@@ -111,21 +122,25 @@
 					subject[key] = newSubjectPropertyValue;
 				}
 
-				subject.save(function(err) {
+				subject.save((function(args, err) {
+
+					var done = args.done,
+						subject = args.subject;
 
 					done(err, [subject]);
-				});
+				}).bind(this, { done, subject }));
 			}
-		});
+		}).bind(this, { done, data }));
 	});
 
 	this.add('role:api, category:subject, cmd:delete', function(args, done) {
 
 		var params = args.params,
-			id = params.id,
-			seneca = this;
+			id = params.id;
 
-		Subject.findById(id, function(err, subject) {
+		Subject.findById(id, (function(args, err, subject) {
+
+			var done = args.done;
 
 			if (err) {
 				done(err);
@@ -134,30 +149,31 @@
 			} else {
 				var subjectId = subject._id;
 
-				seneca.act('role:api, category:task, cmd:delete', {
+				this.act('role:api, category:task, cmd:delete', {
 					params: {
 						subjectid: subjectId
 					}
 				});
 
-				seneca.act('role:api, category:score, cmd:delete', {
+				this.act('role:api, category:score, cmd:delete', {
 					params: {
 						subjectid: subjectId
 					}
 				});
 
-				seneca.act('role:api, category:subject, cmd:unenrollAllStudents', {
+				this.act('role:api, category:subject, cmd:unenrollAllStudents', {
 					params: {
 						subjectid: subjectId
 					}
 				});
 
-				subject.remove(function(err) {
+				subject.remove((function(args, err) {
 
+					var done = args.done;
 					done(err);
-				});
+				}).bind(this, { done }));
 			}
-		});
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:subject, cmd:enrollStudents', function(args, done) {
@@ -165,14 +181,15 @@
 		var body = args.body,
 			data = body.data,
 			subjectId = data.subject,
-			studentIds = data.students,
-			seneca = this;
+			studentIds = data.students;
 
 		User.find({
 			_id: {
 				$in: studentIds
 			}
-		}).cursor().on('data', function(student) {
+		}).cursor().on('data', (function(args, student) {
+
+			var subjectId = args.subjectId;
 
 			if (!student || !Array.isArray(student.enrolledSubjects)) {
 				student.enrolledSubjects = [];
@@ -181,7 +198,7 @@
 			if (student.enrolledSubjects.indexOf(subjectId) === -1) {
 				student.enrolledSubjects.push(subjectId);
 
-				seneca.act('role:api, category:score, cmd:create', {
+				this.act('role:api, category:score, cmd:create', {
 					body: {
 						data: {
 							subject: subjectId,
@@ -192,9 +209,9 @@
 			}
 
 			student.save();
-		});
+		}).bind(this, { subjectId }));
 
-		done(null);
+		done();
 	});
 
 	this.add('role:api, category:subject, cmd:unenrollStudents', function(args, done) {
@@ -202,14 +219,15 @@
 		var body = args.body,
 			data = body.data,
 			subjectId = data.subject,
-			studentIds = data.students,
-			seneca = this;
+			studentIds = data.students;
 
 		User.find({
 			_id: {
 				$in: studentIds
 			}
-		}).cursor().on('data', function(student) {
+		}).cursor().on('data', (function(args, student) {
+
+			var subjectId = args.subjectId;
 
 			if (!student || !Array.isArray(student.enrolledSubjects)) {
 				return;
@@ -221,21 +239,21 @@
 
 				var studentId = student._id;
 
-				seneca.act('role:api, category:task, cmd:unassignAllFromStudentBySubject', {
+				this.act('role:api, category:task, cmd:unassignAllFromStudentBySubject', {
 					params: {
 						subjectid: subjectId,
 						studentid: studentId
 					}
 				});
 
-				seneca.act('role:api, category:delivery, cmd:delete', {
+				this.act('role:api, category:delivery, cmd:delete', {
 					params: {
 						subjectid: subjectId,
 						studentid: studentId
 					}
 				});
 
-				seneca.act('role:api, category:score, cmd:delete', {
+				this.act('role:api, category:score, cmd:delete', {
 					params: {
 						subjectid: subjectId,
 						studentid: studentId
@@ -244,28 +262,29 @@
 			}
 
 			student.save();
-		});
+		}).bind(this, { subjectId }));
 
-		done(null);
+		done();
 	});
 
 	this.add('role:api, category:subject, cmd:unenrollAllStudents', function(args, done) {
 
 		var params = args.params,
-			subjectId = params.subjectid
-			seneca = this;
+			subjectId = params.subjectid;
 
 		User.find({
 			enrolledSubjects: subjectId
-		}).cursor().on('data', function(student) {
+		}).cursor().on('data', (function(args, student) {
 
-			var index = student.enrolledSubjects.indexOf(subjectId);
+			var subjectId = args.subjectId,
+				index = student.enrolledSubjects.indexOf(subjectId);
+
 			student.enrolledSubjects.splice(index, 1);
 
 			student.save();
-		});
+		}).bind(this, { subjectId }));
 
-		done(null);
+		done();
 	});
 
 	this.add('init:subject', function(args, done) {
@@ -275,39 +294,60 @@
 		app.get(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrRequestHasUserQueryFilter.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'findAll'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'findAll'
+			}));
 
 		app.get(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'findById'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'findById'
+			}));
 
 		app.post(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'create'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'create'
+			}));
 
 		app.put(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'update'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'update'
+			}));
 
 		app.delete(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'delete'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'delete'
+			}));
 
 		app.post(prefix + 'enrollstudents', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'enrollStudents'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'enrollStudents'
+			}));
 
 		app.post(prefix + 'unenrollstudents', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdminOrTeacherInSubject.bind(this),
-			commons.expressCbk.bind(this, 'subject', 'unenrollStudents'));
+			commons.expressCbk.bind(this, {
+				cat: 'subject',
+				cmd: 'unenrollStudents'
+			}));
 
 		done();
 	});
 
 	return 'subject';
-}
+};

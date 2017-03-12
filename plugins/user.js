@@ -1,4 +1,4 @@
-﻿module.exports = function user(options) {
+module.exports = function user(options) {
 
 	var mongoose = require('mongoose'),
 		User = mongoose.model('user'),
@@ -21,9 +21,10 @@
 				params: {
 					id: subjectId
 				}
-			}, (function(done, err, reply) {
+			}, (function(args, err, reply) {
 
-				var subject = reply[0],
+				var done = args.done,
+					subject = reply[0],
 					teachers = subject.teachers,
 					queryObj = {
 						_id: {
@@ -31,11 +32,12 @@
 						}
 					};
 
-				User.find(queryObj, (function(done, err, users) {
+				User.find(queryObj).sort('surname').exec((function(args, err, users) {
 
+					var done = args.done;
 					done(err, users);
-				}).bind(this, done));
-			}).bind(this, done));
+				}).bind(this, { done }));
+			}).bind(this, { done }));
 			return;
 		}
 
@@ -70,10 +72,11 @@
 			queryObj = { 'assignedTasks': assignedTaskId };
 		}
 
-		User.find(queryObj, function(err, users) {
+		User.find(queryObj).sort('surname').exec((function(args, err, users) {
 
+			var done = args.done;
 			done(err, users);
-		});
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:user, cmd:findById', function(args, done) {
@@ -81,8 +84,9 @@
 		var params = args.params,
 			id = params.id;
 
-		User.findById(id, function(err, user) {
+		User.findById(id, (function(args, err, user) {
 
+			var done = args.done;
 			if (err) {
 				done(err);
 			} else if (!user) {
@@ -90,7 +94,7 @@
 			} else {
 				done(null, [user]);
 			}
-		});
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:user, cmd:create', function(args, done) {
@@ -103,10 +107,13 @@
 
 		var user = new User(data);
 
-		user.save(function(err) {
+		user.save((function(args, err) {
+
+			var done = args.done,
+				user = args.user;
 
 			done(err, [user]);
-		});
+		}).bind(this, { done, user }));
 	});
 
 	this.add('role:api, category:user, cmd:update', function(args, done) {
@@ -116,7 +123,10 @@
 			id = params.id,
 			data = body.data;
 
-		User.findById(id, function(err, user) {
+		User.findById(id, (function(args, err, user) {
+
+			var done = args.done,
+				data = args.data;
 
 			if (err) {
 				done(err);
@@ -130,22 +140,25 @@
 					}
 				}
 
-				user.save(function(err) {
+				user.save((function(args, err) {
+
+					var done = args.done,
+						user = args.user;
 
 					done(err, [user]);
-				});
+				}).bind(this, { done, user }));
 			}
-		});
+		}).bind(this, { done, data }));
 	});
 
 	this.add('role:api, category:user, cmd:delete', function(args, done) {
 
 		var params = args.params,
-			id = params.id,
-			seneca = this;
+			id = params.id;
 
-		User.findById(id, function(err, user) {
+		User.findById(id, (function(args, err, user) {
 
+			var done = args.done;
 			if (err) {
 				done(err);
 			} else if (!user) {
@@ -156,7 +169,7 @@
 					assignedTasks = user.assignedTasks;
 
 				if (enrolledSubjects && enrolledSubjects.length) {
-					seneca.act('role:api, category:score, cmd:delete', {
+					this.act('role:api, category:score, cmd:delete', {
 						params: {
 							studentid: userId
 						}
@@ -164,19 +177,20 @@
 				}
 
 				if (assignedTasks && assignedTasks.length) {
-					seneca.act('role:api, category:delivery, cmd:delete', {
+					this.act('role:api, category:delivery, cmd:delete', {
 						params: {
 							studentid: userId
 						}
 					});
 				}
 
-				user.remove(function(err) {
+				user.remove((function(args, err) {
 
+					var done = args.done;
 					done(err);
-				});
+				}).bind(this, { done }));
 			}
-		});
+		}).bind(this, { done }));
 	});
 
 	this.add('role:api, category:user, cmd:checkUserHasOwnToken', function(args, done) {
@@ -191,7 +205,10 @@
 
 		Token.findOne({
 			accessToken: userToken
-		}, (function(userId, err, token) {
+		}, (function(args, err, token) {
+
+			var done = args.done,
+				userId = args.userId;
 
 			if (err) {
 				done(err);
@@ -204,15 +221,17 @@
 					query: {
 						email: user.email
 					}
-				}, (function(userId, args, reply) {
+				}, (function(args, err, reply) {
 
-					var user = reply[0],
+					var done = args.done,
+						userId = args.userId,
+						user = reply[0],
 						hasOwnToken = userId === user._id.toString();
 
-					done(null, { hasOwnToken: hasOwnToken });
-				}).bind(this, userId));
+					done(err, { hasOwnToken });
+				}).bind(this, { done, userId }));
 			}
-		}).bind(this, userId));
+		}).bind(this, { done, userId }));
 	});
 
 	this.add('init:user', function(args, done) {
@@ -220,29 +239,44 @@
 		var prefix = '/user/';
 
 		app.get(prefix, app.oauth.authorise(),
-			commons.expressCbk.bind(this, 'user', 'findAll'));
+			commons.expressCbk.bind(this, {
+				cat: 'user',
+				cmd: 'findAll'
+			}));
 
 		app.get(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
-			commons.expressCbk.bind(this, 'user', 'findById'));
+			commons.expressCbk.bind(this, {
+				cat: 'user',
+				cmd: 'findById'
+			}));
 
 		app.post(prefix, app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			commons.expressCbk.bind(this, 'user', 'create'));
+			commons.expressCbk.bind(this, {
+				cat: 'user',
+				cmd: 'create'
+			}));
 
 		app.put(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			commons.expressCbk.bind(this, 'user', 'update'));
+			commons.expressCbk.bind(this, {
+				cat: 'user',
+				cmd: 'update'
+			}));
 
 		app.delete(prefix + ':id', app.oauth.authorise(),
 			commons.checkUserHasOwnToken.bind(this),
 			commons.checkUserIsAdmin.bind(this),
-			commons.expressCbk.bind(this, 'user', 'delete'));
+			commons.expressCbk.bind(this, {
+				cat: 'user',
+				cmd: 'delete'
+			}));
 
 		done();
 	});
 
 	return 'user';
-}
+};

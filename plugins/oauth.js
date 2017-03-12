@@ -1,4 +1,4 @@
-﻿module.exports = function oauth(options) {
+module.exports = function oauth(options) {
 
 	var oauthServer = require('oauth2-server'),
 		app = options.app;
@@ -19,4 +19,4 @@
 	});
 
 	return 'oauth';
-}
+};
