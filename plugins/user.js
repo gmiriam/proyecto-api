@@ -32,7 +32,7 @@ module.exports = function user(options) {
 						}
 					};
 
-				User.find(queryObj, (function(args, err, users) {
+				User.find(queryObj).sort('surname').exec((function(args, err, users) {
 
 					var done = args.done;
 					done(err, users);
@@ -72,7 +72,7 @@ module.exports = function user(options) {
 			queryObj = { 'assignedTasks': assignedTaskId };
 		}
 
-		User.find(queryObj, (function(args, err, users) {
+		User.find(queryObj).sort('surname').exec((function(args, err, users) {
 
 			var done = args.done;
 			done(err, users);

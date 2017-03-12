@@ -32,7 +32,7 @@ module.exports = function task(options) {
 						subject: subjectId
 					};
 
-				Task.find(queryObj, (function(args, err, tasks) {
+				Task.find(queryObj).sort('name').exec((function(args, err, tasks) {
 
 					var done = args.done;
 					done(err, tasks);
@@ -45,7 +45,7 @@ module.exports = function task(options) {
 				};
 			}
 
-			Task.find(queryObj, (function(args, err, tasks) {
+			Task.find(queryObj).sort('name').exec((function(args, err, tasks) {
 
 				var done = args.done;
 				done(err, tasks);

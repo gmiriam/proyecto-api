@@ -24,7 +24,7 @@ module.exports = function subject(options) {
 				teachers: teacherId
 			};
 
-			Subject.find(queryObj, (function(args, err, subjects) {
+			Subject.find(queryObj).sort('name').exec((function(args, err, subjects) {
 
 				var done = args.done;
 				done(err, subjects);
@@ -51,7 +51,7 @@ module.exports = function subject(options) {
 						}
 					};
 
-				Subject.find(queryObj, (function(args, err, subjects) {
+				Subject.find(queryObj).sort('name').exec((function(args, err, subjects) {
 
 					var done = args.done;
 					done(err, subjects);
@@ -59,7 +59,7 @@ module.exports = function subject(options) {
 			}).bind(this, { done }));
 
 		} else {
-			Subject.find((function(args, err, subjects) {
+			Subject.find().sort('name').exec((function(args, err, subjects) {
 
 				var done = args.done;
 				done(err, subjects);
