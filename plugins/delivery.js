@@ -115,30 +115,38 @@ module.exports = function delivery(options) {
 			} else if (!delivery) {
 				done(new Error("Not found"));
 			} else {
-				delivery.score = score;
-
-				delivery.save((function(args, err) {
-
-					var done = args.done,
-						delivery = args.delivery;
-
-					done(err, [delivery]);
-				}).bind(this, { done, delivery }));
-
-				var studentId = delivery.student;
 				this.act('role:api, category:task, cmd:findById', {
 					params: { id: delivery.task }
 				}, (function(args, err, reply) {
 
-					var studentId = args.studentId,
+					var done = args.done,
+						delivery = args.delivery,
+						score = args.score,
+						studentId = delivery.student,
 						task = reply[0],
 						subjectId = task.subject;
 
-					this.act('role:api, category:score, cmd:calculateAndUpdateScore', {
-						subjectid: subjectId,
-						studentid: studentId
-					});
-				}).bind(this, { studentId }));
+					if (task.maxScore < score) {
+						done(new Error("Score is higher than maxScore"));
+						return;
+					}
+
+					delivery.score = score;
+					delivery.save((function(args, err) {
+
+						var done = args.done,
+							delivery = args.delivery,
+							studentId = args.studentId,
+							subjectId = args.subjectId;
+
+						done(err, [delivery]);
+
+						this.act('role:api, category:score, cmd:calculateAndUpdateScore', {
+							subjectid: subjectId,
+							studentid: studentId
+						});
+					}).bind(this, { done, delivery, subjectId, studentId }));
+				}).bind(this, { done, delivery, score }));
 			}
 		}).bind(this, { done, score }));
 	});
